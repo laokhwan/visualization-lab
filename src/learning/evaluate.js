@@ -1,26 +1,23 @@
 import { datasets } from '../content/datasets.js';
 import { validateChart } from '../charts/validation.js';
 
-export function evaluate(task, draft) {
+export function evaluateDesign(task, config) {
   const criteria = task.criteria.map(rule => ({
     label: rule.label,
     hint: rule.hint,
     passed: rule.test === 'honestAxis'
-      ? draft.config.kind !== 'bar' || draft.config.baseline === 0
-      : rule.values.includes(draft.config[rule.key]),
+      ? config.kind !== 'bar' || config.baseline === 0
+      : rule.values.includes(config[rule.key]),
   }));
-  const errors = validateChart(datasets[task.dataset], draft.config);
+  const errors = validateChart(datasets[task.dataset], config);
   criteria.push({ label: 'ช่วงแกนและข้อมูลแสดงได้ถูกต้อง', passed: errors.length === 0, hint: errors.join(' · ') });
-  criteria.push({ label: 'บันทึกการคาดการณ์ก่อนสรุปผล', passed: Boolean(draft.prediction.trim()), hint: 'บันทึกสิ่งที่คาดไว้ คำคาดการณ์ไม่จำเป็นต้องถูกต้อง' });
-  criteria.push({ label: 'เขียนคำอธิบายจากการทดลอง', passed: Boolean(draft.note.trim()), hint: 'อธิบายสิ่งที่สังเกตและเหตุผลของการเลือก' });
-  if (task.secondPrompt) criteria.push({ label: 'เขียนคำอธิบายประเด็นที่ 2', passed: Boolean(draft.note2.trim()), hint: 'ระบุการปรับปรุงอีกประเด็นและผลต่อการตีความ' });
   return { passed: criteria.every(item => item.passed), criteria };
 }
 
-export function submit(task, draft) {
-  draft.attempts += 1;
-  draft.feedback = evaluate(task, draft);
-  draft.dirty = false;
-  if (draft.feedback.passed) draft.everPassed = true;
-  return draft.feedback;
+export function evaluateAnswer(question, selectedIds) {
+  if (!Array.isArray(selectedIds) || !selectedIds.length || new Set(selectedIds).size !== selectedIds.length || selectedIds.some(id => !question.options.some(option => option.id === id)) || (question.type === 'single' && selectedIds.length !== 1)) {
+    return { valid: false, correct: false, message: question.type === 'single' ? 'เลือกคำตอบ 1 ข้อก่อนส่ง' : 'เลือกคำตอบอย่างน้อย 1 ข้อ โดยไม่เลือกซ้ำ' };
+  }
+  const correct = selectedIds.length === question.correctOptionIds.length && question.correctOptionIds.every(id => selectedIds.includes(id));
+  return { valid: true, correct };
 }

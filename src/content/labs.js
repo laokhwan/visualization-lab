@@ -5,11 +5,15 @@ export const labs = [
     intro: 'เลือกกราฟตามคำถามและลักษณะของข้อมูล', controls: ['kind'],
     tasks: [
       { id: 'compare', dataset: 'groups', mission: 'เลือกกราฟสำหรับเปรียบเทียบชั่วโมงอ่านหนังสือเฉลี่ยของแต่ละห้อง',
+        questionIds: ['compare-reason', 'compare-alternatives'],
+        experiment: [{ id: 'pie', label: 'กราฟวงกลม', match: { kind: ['pie'] } }, { id: 'comparison', label: 'กราฟแท่งหรือกราฟจุด', match: { kind: ['bar', 'dot'] } }],
         predict: 'กราฟชนิดใดช่วยเปรียบเทียบค่าระหว่างห้องได้ชัดเจน', prediction: 'chart',
         prompt: 'กราฟที่เลือกช่วยเปรียบเทียบข้อมูลอย่างไร',
         config: { ...defaultConfig, kind: 'pie' },
         criteria: [{ key: 'kind', values: ['bar', 'dot'], label: 'ใช้กราฟสำหรับเปรียบเทียบหมวดหมู่', hint: 'กราฟแท่งและกราฟจุดช่วยเปรียบเทียบค่าของห้องเรียน กราฟเส้นอาจสื่อว่าห้องเรียนมีลำดับต่อเนื่อง' }] },
       { id: 'time', dataset: 'trend', mission: 'เลือกกราฟสำหรับแสดงการเปลี่ยนแปลงอุณหภูมิตามเวลา',
+        questionIds: ['time-design', 'time-interpretation'],
+        experiment: [{ id: 'bar', label: 'กราฟแท่ง', match: { kind: ['bar'] } }, { id: 'line', label: 'กราฟเส้น', match: { kind: ['line'] } }],
         predict: 'กราฟชนิดใดช่วยแสดงแนวโน้มตามเวลา', prediction: 'chart',
         prompt: 'เส้นที่เชื่อมแต่ละช่วงเวลาช่วยให้เห็นอะไร',
         config: { ...defaultConfig },
@@ -19,6 +23,8 @@ export const labs = [
   {
     id: 'color', title: 'การใช้สีในกราฟ', english: 'Color Matters', intro: 'ใช้สีให้สอดคล้องกับสิ่งที่ต้องการสื่อ', controls: ['palette', 'highlight'],
     tasks: [{ id: 'focus', dataset: 'groups', mission: 'ปรับสีเพื่อเน้นข้อมูลของห้อง C โดยยังเปรียบเทียบกับห้องอื่นได้',
+      questionIds: ['color-focus', 'color-meaning'],
+      experiment: [{ id: 'categorical', label: 'สีแยกหมวดหมู่', match: { palette: ['categorical'] } }, { id: 'highlight', label: 'สีเน้นห้อง C', match: { palette: ['highlight'], highlight: [2] } }],
       predict: 'การใช้สีแบบใดช่วยให้เห็นห้อง C ก่อน', prediction: 'color', prompt: 'การเน้นสีเฉพาะห้อง C ช่วยให้ผู้อ่านเข้าใจข้อมูลอย่างไร',
       config: { ...defaultConfig, palette: 'categorical' },
       criteria: [
@@ -29,6 +35,8 @@ export const labs = [
   {
     id: 'misleading', title: 'กราฟที่อาจทำให้เข้าใจผิด', english: 'Misleading Charts', intro: 'ตรวจสอบผลของช่วงแกนต่อการรับรู้ความแตกต่าง', controls: ['baseline'], compare: true,
     tasks: [{ id: 'axis', dataset: 'scores', mission: 'เปรียบเทียบกราฟต้นฉบับกับกราฟที่ปรับแกน แล้วลดการขยายความต่างเกินจริง',
+      questionIds: ['axis-perception', 'axis-principles'],
+      experiment: [{ id: 'truncated', label: 'กราฟแท่งเริ่มแกนที่ 70', match: { kind: ['bar'], baseline: [70] } }, { id: 'zero', label: 'กราฟแท่งเริ่มแกนที่ 0', match: { kind: ['bar'], baseline: [0] } }],
       predict: 'เมื่อเริ่มแกนตั้งที่ 70 ความต่างจะดูเป็นอย่างไร', prediction: 'axis', prompt: 'การเริ่มแกนตั้งที่ 70 ส่งผลต่อการตีความความต่างอย่างไร',
       config: { ...defaultConfig, baseline: 70 },
       criteria: [{ key: 'baseline', values: [0], label: 'กราฟแท่งเริ่มแกนตั้งที่ศูนย์', hint: 'กราฟแท่งใช้ความยาวแทนค่า การเริ่มที่ศูนย์ช่วยรักษาสัดส่วนของความยาว' }] }],
@@ -36,6 +44,8 @@ export const labs = [
   {
     id: 'redesign', title: 'ปรับปรุงการนำเสนอข้อมูล', english: 'Redesign Challenge', intro: 'ปรับกราฟให้อ่านง่ายและสื่อความหมายอย่างเหมาะสม', controls: ['kind', 'palette', 'highlight', 'baseline'], compare: true,
     tasks: [{ id: 'revision', dataset: 'scores', mission: 'ปรับกราฟคะแนนที่ตัดแกนและใช้หลายสี พร้อมอธิบายการปรับปรุง 2 ประเด็น',
+      questionIds: ['redesign-choice', 'redesign-principles'],
+      experiment: [{ id: 'original', label: 'กราฟเริ่มต้น', match: { kind: ['bar'], palette: ['categorical'], baseline: [70] } }, { id: 'revised', label: 'กราฟที่ปรับผ่านเกณฑ์', design: true }],
       predict: 'ส่วนใดของกราฟควรปรับปรุง และเพราะเหตุใด', prediction: 'text', prompt: 'อธิบายการปรับปรุงประเด็นที่ 1 และผลต่อการตีความ',
       secondPrompt: 'อธิบายการปรับปรุงประเด็นที่ 2 และผลต่อการตีความ',
       config: { ...defaultConfig, palette: 'categorical', baseline: 70 },

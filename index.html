@@ -19,7 +19,7 @@
     </section>
     <section id="workspace" class="workspace" tabindex="-1" aria-label="พื้นที่เรียนรู้">
       <div class="switcher" role="group" aria-label="รูปแบบการเรียนรู้"><button data-mode="guided" aria-pressed="true">กิจกรรมตามขั้นตอน <small>(Guided Challenge)</small></button><button data-mode="free" aria-pressed="false">ทดลองอิสระ <small>(Free Exploration)</small></button></div>
-      <div class="workgrid"><aside class="sidebar" aria-label="เลือกกิจกรรม"><div id="navigation"></div><div class="aside-foot"><p id="progress-text"></p><progress id="progress" value="0" max="4" aria-label="จำนวนกิจกรรมที่ผ่านเกณฑ์"></progress><p class="help">ความคืบหน้าอยู่ในหน้านี้เท่านั้น และหายเมื่อโหลดใหม่</p></div></aside>
+      <div class="workgrid"><aside class="sidebar" aria-label="เลือกกิจกรรม"><div id="navigation"></div><div id="guided-progress" class="aside-foot"><p id="progress-text"></p><progress id="progress" value="0" max="10" aria-label="จำนวนข้อที่เคยตอบถูก"></progress><p id="completion-text"></p><button id="show-summary" class="secondary">สรุปการเรียนรู้</button><button id="reset-guided" class="text-button">เริ่มการฝึกใหม่ทั้งหมด</button><p class="help">ความคืบหน้าอยู่ในหน้านี้เท่านั้น และหายเมื่อโหลดใหม่</p></div></aside>
         <section id="stage" class="stage" aria-labelledby="stage-title"></section>
       </div>
     </section>

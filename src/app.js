@@ -1,11 +1,15 @@
 import { datasets, copyDataset } from './content/datasets.js';
 import { labs } from './content/labs.js';
-import { createState, current, selectLab, completedLabs, markChanged } from './state.js';
-import { submit } from './learning/evaluate.js';
+import { createState, current, selectLab, resetGuided, resetChart } from './state.js';
+import { submitAnswer, retryQuestion, completeTask } from './learning/practice.js';
+import { savePrediction, recordExperiment, experimentComplete } from './learning/experiments.js';
+import { buildLearningSummary } from './learning/report.js';
 import { chartSvg, legendHtml } from './charts/render.js';
 import { validateDataset, validateChart, suitability } from './charts/validation.js';
 import { normalizedConfig, yDomain, formatNumber } from './charts/scales.js';
-import { navigationHtml, stageHtml, tableHtml, feedbackHtml } from './ui/views.js';
+import { navigationHtml, stageHtml, tableHtml } from './ui/views.js';
+import { questionHtml, experimentsHtml, reflectionStatus, completionFeedbackHtml, completionReviewHtml } from './ui/practice.js';
+import { summaryHtml } from './ui/summary.js';
 import { syncCapabilities, editorRow } from './ui/controls.js';
 import { escapeHtml as esc, options } from './ui/html.js';
 
@@ -19,15 +23,19 @@ function active() {
 
 function renderNavigation() {
   $('navigation').innerHTML = navigationHtml(state);
-  const count = completedLabs(state);
-  $('progress-text').textContent = `กิจกรรมที่เคยผ่านเกณฑ์ ${count} / ${labs.length}`;
-  $('progress').max = labs.length;
-  $('progress').value = count;
+  $('guided-progress').hidden = state.mode === 'free';
+  if (state.mode === 'guided') {
+    const { totals } = buildLearningSummary(state);
+    $('progress-text').textContent = `ข้อที่เคยตอบถูก ${totals.masteredQuestionCount} / ${totals.questionCount}`;
+    $('completion-text').textContent = `ทำครบ ${totals.completedTaskCount} / ${totals.taskCount} สถานการณ์ · ${totals.completedLabCount} / ${totals.labCount} แล็บ`;
+    $('progress').max = totals.questionCount;
+    $('progress').value = totals.masteredQuestionCount;
+  }
   document.querySelectorAll('[data-mode]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.mode === state.mode)));
 }
 
-function renderFeedback() {
-  if ($('feedback')) $('feedback').innerHTML = feedbackHtml(current(state).draft);
+function renderCompletion() {
+  if ($('completion-feedback')) $('completion-feedback').innerHTML = completionFeedbackHtml(current(state).draft);
 }
 
 function updateChart() {
@@ -49,9 +57,12 @@ function updateChart() {
 
 function renderStage(focus = false) {
   renderNavigation();
-  $('stage').innerHTML = stageHtml(state);
-  updateChart();
-  renderFeedback();
+  if (state.mode === 'guided' && state.view === 'summary') $('stage').innerHTML = summaryHtml(buildLearningSummary(state));
+  else {
+    $('stage').innerHTML = stageHtml(state);
+    updateChart();
+    renderCompletion();
+  }
   if (focus) {
     $('stage-title').focus({ preventScroll: true });
     $('workspace').scrollIntoView({ behavior: 'auto', block: 'start' });
@@ -60,16 +71,15 @@ function renderStage(focus = false) {
 
 function changeMode(mode, focus = true) {
   state.mode = mode;
+  state.view = 'activity';
   renderStage(focus);
 }
 
 function changed() {
   if (state.mode === 'guided') {
     const { draft } = current(state);
-    if (draft.feedback && !draft.dirty) {
-      markChanged(draft);
-      renderFeedback();
-    }
+    draft.completionFeedback = null;
+    renderCompletion();
   }
 }
 
@@ -87,7 +97,7 @@ function moveTask(direction) {
   const index = labs.indexOf(lab);
   const next = state.taskIndex + direction;
   if (next >= 0 && next < lab.tasks.length) state.taskIndex = next;
-  else if (direction > 0 && index === labs.length - 1) state.mode = 'free';
+  else if (direction > 0 && index === labs.length - 1) state.view = 'summary';
   else if (labs[index + direction]) {
     state.labId = labs[index + direction].id;
     state.taskIndex = direction < 0 ? labs[index - 1].tasks.length - 1 : 0;
@@ -98,10 +108,13 @@ function moveTask(direction) {
 function inspectPoint(target) {
   const mark = target.closest('[data-point]');
   if (!mark) return;
-  const { data } = active();
+  const evidence = mark.closest('[data-evidence]');
+  const { draft } = current(state);
+  const saved = evidence ? evidence.dataset.evidence === 'completion' ? draft.completion : draft.experiments.find(item => item.slotId === evidence.dataset.evidence) : null;
+  const data = saved?.dataset || active().data;
   const row = data.rows[Number(mark.dataset.point)];
   if (!row) return;
-  const output = mark.closest('#original-chart') ? $('original-inspection') : $('inspection');
+  const output = evidence ? evidence.querySelector('.inspection') : mark.closest('#original-chart') ? $('original-inspection') : $('inspection');
   output.textContent = `${row.label}${data.xType !== 'category' ? ` · ${data.xLabel} ${formatNumber(row.x)}` : ''}: ${formatNumber(row.value)} ${data.unit}`;
 }
 
@@ -121,6 +134,15 @@ function relabelRows() {
 document.querySelectorAll('[data-mode]').forEach(button => button.addEventListener('click', () => changeMode(button.dataset.mode)));
 $('start-guided').addEventListener('click', () => changeMode('guided'));
 $('start-free').addEventListener('click', () => changeMode('free'));
+$('show-summary').addEventListener('click', () => {
+  state.view = 'summary';
+  renderStage(true);
+});
+$('reset-guided').addEventListener('click', () => {
+  if (!window.confirm('เริ่มการฝึกใหม่ทั้งหมดหรือไม่ คำคาดการณ์ หลักฐาน คำตอบ จำนวนครั้ง และ Mastery ในกิจกรรมตามขั้นตอนจะถูกล้าง โดยไม่เปลี่ยนการทดลองอิสระ')) return;
+  resetGuided(state);
+  renderStage(true);
+});
 $('navigation').addEventListener('click', event => {
   const lab = event.target.closest('[data-lab]');
   const dataset = event.target.closest('[data-dataset]');
@@ -134,7 +156,17 @@ $('navigation').addEventListener('click', event => {
 
 $('stage').addEventListener('change', event => {
   const input = event.target;
+  const questionForm = input.closest('[data-question-form]');
+  if (questionForm && state.mode === 'guided') {
+    const progress = current(state).draft.questions[questionForm.dataset.questionForm];
+    if (!progress.editing) return;
+    progress.selectedOptionIds = [...questionForm.querySelectorAll('input:checked')].map(item => item.value);
+    progress.validationMessage = '';
+    $(`${questionForm.dataset.questionForm}-validation`).textContent = '';
+    return;
+  }
   if (!input.matches('[data-config]')) return;
+  if (state.mode === 'guided' && !current(state).draft.predictionSaved) return;
   const key = input.dataset.config;
   const { config } = active();
   config[key] = input.type === 'checkbox' ? input.checked : ['baseline', 'upper', 'highlight'].includes(key)
@@ -147,12 +179,16 @@ $('stage').addEventListener('input', event => {
   const keys = { prediction: 'prediction', reflection: 'note', 'reflection-2': 'note2' };
   const key = keys[event.target.id];
   if (key && state.mode === 'guided') {
-    current(state).draft[key] = event.target.value;
+    const { task, draft } = current(state);
+    if (key === 'prediction' ? draft.predictionSaved : !experimentComplete(task, draft)) return;
+    draft[key] = event.target.value;
+    if (key === 'note' || key === 'note2') $(`reflection-status-${key === 'note' ? '1' : '2'}`).textContent = reflectionStatus(draft[key]);
     changed();
   }
 });
 $('stage').addEventListener('change', event => {
   if (event.target.id === 'prediction' && state.mode === 'guided') {
+    if (current(state).draft.predictionSaved) return;
     current(state).draft.prediction = event.target.value;
     changed();
   }
@@ -165,11 +201,53 @@ $('stage').addEventListener('click', event => {
   if (target.hasAttribute('data-task')) {
     state.taskIndex = Number(target.dataset.task);
     renderStage(true);
-  } else if (target.id === 'check') {
+  } else if (target.id === 'save-prediction') {
     const { task, draft } = current(state);
-    submit(task, draft);
-    renderFeedback();
+    const result = savePrediction(draft);
+    $('prediction-message').textContent = result.message;
+    if (result.accepted) {
+      $('prediction').disabled = true;
+      target.disabled = true;
+      target.textContent = 'บันทึกคำคาดการณ์แล้ว';
+      $('experiment-controls').disabled = false;
+      $('record-experiment').disabled = false;
+      syncCapabilities($('controls'), draft.config);
+    }
+  } else if (target.id === 'record-experiment') {
+    const { task, draft } = current(state);
+    const result = recordExperiment(task, draft);
+    $('experiment-message').textContent = result.message;
+    if (result.accepted) {
+      $('experiments-list').innerHTML = experimentsHtml(task, draft);
+      const unlocked = experimentComplete(task, draft);
+      $('reasoning-locked').hidden = unlocked;
+      $('reasoning').hidden = !unlocked;
+      $('reasoning-fields').disabled = !unlocked;
+      if (unlocked) $('practice-announcement').textContent = 'บันทึกกราฟครบแล้ว เปิดคำถามและช่องสะท้อนคิดแล้ว';
+    }
+  } else if (target.hasAttribute('data-retry')) {
+    const { task, draft } = current(state);
+    const id = target.dataset.retry;
+    retryQuestion(draft.questions[id]);
+    $(`question-${id}`).innerHTML = questionHtml(id, draft.questions[id], task.questionIds.indexOf(id));
+    $(`question-${id}`).querySelector('input').focus({ preventScroll: true });
+  } else if (target.id === 'complete-task') {
+    const { task, draft } = current(state);
+    completeTask(task, draft);
+    if (draft.completion) target.textContent = 'ตรวจเกณฑ์ปัจจุบัน';
+    renderCompletion();
+    $('completion-review').innerHTML = completionReviewHtml(task, draft);
     renderNavigation();
+    $('completion-feedback').focus({ preventScroll: true });
+    $('practice-announcement').textContent = draft.completionFeedback.retainedEvidence ? 'ตรวจฉบับปัจจุบันแล้ว ผลที่เคยทำครบและหลักฐานเดิมยังคงอยู่' : draft.completionFeedback.passed ? 'บันทึกกิจกรรมครบแล้ว' : 'ยังทำกิจกรรมไม่ครบ โปรดตรวจรายการ';
+  } else if (target.id === 'return-activity') {
+    state.view = 'activity';
+    renderStage(true);
+  } else if (target.hasAttribute('data-review-lab')) {
+    selectLab(state, target.dataset.reviewLab);
+    state.taskIndex = current(state).lab.tasks.findIndex(task => task.id === target.dataset.reviewTask);
+    renderStage(true);
+    if (target.dataset.reviewQuestion) $(`${target.dataset.reviewQuestion}-feedback`)?.focus();
   } else if (target.id === 'reset-chart') {
     if (state.mode === 'free') {
       const data = copyDataset(state.free.dataset.id);
@@ -180,7 +258,7 @@ $('stage').addEventListener('click', event => {
       $('reset-chart').focus({ preventScroll: true });
     } else {
       const { task, draft } = current(state);
-      draft.config = { ...task.config };
+      resetChart(task, draft);
       changed();
       syncControlValues();
       updateChart();
@@ -218,6 +296,23 @@ $('stage').addEventListener('keydown', event => {
 });
 
 $('stage').addEventListener('submit', event => {
+  const questionId = event.target.dataset.questionForm;
+  if (questionId) {
+    event.preventDefault();
+    if (state.mode !== 'guided') return;
+    const { task, draft } = current(state);
+    const result = submitAnswer(task, draft, questionId);
+    if (!result.accepted) {
+      $(`${questionId}-validation`).textContent = result.message;
+      return;
+    }
+    $(`question-${questionId}`).innerHTML = questionHtml(questionId, draft.questions[questionId], task.questionIds.indexOf(questionId));
+    renderNavigation();
+    changed();
+    $(`${questionId}-feedback`).focus({ preventScroll: true });
+    $('practice-announcement').textContent = result.correct ? 'คำตอบผ่านเกณฑ์แล้ว และบันทึกจำนวนครั้งแล้ว' : 'บันทึกความพยายามแล้ว โปรดทบทวนคำแนะนำและลองอีกครั้ง';
+    return;
+  }
   if (event.target.id !== 'data-form') return;
   event.preventDefault();
   const form = new FormData(event.target);
