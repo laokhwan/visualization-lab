@@ -1,11 +1,14 @@
 import { th } from '../content/locales/th.js';
 import { options, escapeHtml as esc } from './html.js';
+import { isResearch } from '../data/view.js';
+import { researchControls, researchEditor } from './research.js';
 
 function select(id, label, items, value) {
   return `<div class="field"><label for="${id}">${label}</label><select id="${id}" data-config="${id}">${options(items, value)}</select></div>`;
 }
 
 export function controlsHtml(data, config, allowed, free) {
+  if (isResearch(data)) return researchControls(data,config,free);
   let html = '<h3>ปรับกราฟ</h3>';
   if (allowed.includes('kind')) html += select('kind', 'ชนิดกราฟ', th.kinds, config.kind);
   if (allowed.includes('palette')) html += select('palette', 'รูปแบบสี', th.palettes, config.palette);
@@ -29,6 +32,7 @@ export function syncCapabilities(root, config) {
 }
 
 export function editorHtml(data) {
+  if (isResearch(data)) return researchEditor(data);
   return `<details id="data-editor"><summary>แก้ไขข้อมูลตัวอย่าง</summary><form id="data-form" novalidate>
     <p class="help">ใช้ข้อมูลจำลองเท่านั้น ข้อมูลที่แก้ไขจะหายเมื่อปิดหรือโหลดหน้าใหม่</p>
     <div class="metadata"><div class="field"><label for="edit-title">ชื่อกราฟ</label><input id="edit-title" name="title" maxlength="100" value="${esc(data.title)}"></div>

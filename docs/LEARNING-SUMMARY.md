@@ -1,4 +1,4 @@
-# LearningSummaryV1 และขอบเขตการเชื่อมต่อ
+# LearningSummaryV2 และขอบเขตการเชื่อมต่อ
 
 `buildLearningSummary(state)` ใน `src/learning/report.js` คืน plain object ที่แปลงเป็น JSON ได้ ไม่มีการแก้ state ไม่มีเครือข่าย และไม่มีการดาวน์โหลดไฟล์ การเรียกซ้ำไม่เพิ่มจำนวนครั้งตอบ
 
@@ -6,7 +6,7 @@
 
 | ส่วน | ฟิลด์ |
 |---|---|
-| Root | `schemaVersion: 1`, `contentVersion`, `labs`, `totals`, `questionsNeedingPractice`, `repeatedAttemptQuestions`, `integrity: 'browser-unverified'` |
+| Root | `schemaVersion: 2`, `contentVersion`, `sections`, `labs`, `totals`, `questionsNeedingPractice`, `repeatedAttemptQuestions`, `integrity: 'browser-unverified'` |
 | Lab | `labId`, `masteryStatus`, `completionStatus`, `attemptCount`, `incorrectAttemptCount`, `tasks` |
 | Task | `labId`, `taskId`, `masteryStatus`, `completionStatus`, `experimentStatus`, `designStatus`, `reflectionProvided`, `reflectionEvaluation: 'not-evaluated'`, `attemptCount`, `incorrectAttemptCount`, `questions` |
 | Question | `labId`, `taskId`, `questionId`, `masteryStatus`, `completionStatus`, `attemptCount`, `incorrectAttemptCount`, `firstMasteredAttempt`, `latestCorrect` |
@@ -37,9 +37,9 @@ state → buildLearningSummary → summaryHtml
 
 รหัส snapshot ในประวัติเป็นรหัสภายในสถานการณ์ ไม่มีรหัสติดตามผู้ใช้ หลักฐานแต่ละรูปแบบบันทึกเพียงครั้งเดียว การคืนค่ากราฟไม่ลบหลักฐาน การเริ่มการฝึกใหม่ทั้งหมดล้าง Guided หลังยืนยัน โดยไม่เปลี่ยน Free Exploration
 
-## LearningReportV1 และขอบเขต Google Classroom
+## LearningReportV2 และขอบเขต Google Classroom
 
-Phase 1.2 เพิ่ม `LearningReportV1` เป็นแบบจำลองแยกจาก summary เดิม โดยมี `reportSchemaVersion`, `generatedAt`, `contentVersion`, `integrity`, `summary`, `includeDrafts` และ `evidence` รายสถานการณ์ หลักฐานมี lab/task IDs, source (`completed`/`in-progress`), experiments, finalChart, prediction และ reflections พร้อม `reflectionEvaluation: 'not-evaluated'` การสร้างใช้ deep copy จาก state ไม่อ่านข้อความย้อนจาก DOM และไม่เพิ่มสะท้อนคิดลง `LearningSummaryV1` เดิม
+รายงานปัจจุบันใช้ `LearningReportV2` เป็นแบบจำลองแยกจาก summary เดิม โดยมี `reportSchemaVersion`, `generatedAt`, `contentVersion`, `integrity`, `summary`, `includeDrafts` และ `evidence` รายสถานการณ์ หลักฐานมี lab/task IDs, source (`completed`/`in-progress`), experiments, finalChart, prediction และ reflections พร้อม `reflectionEvaluation: 'not-evaluated'` การสร้างใช้ deep copy จาก state ไม่อ่านข้อความย้อนจาก DOM และไม่เพิ่มสะท้อนคิดลง `LearningSummaryV2` เดิม
 
 Classroom adapter ในอนาคตใช้ขอบเขต `prepare(summary, externalAssignmentContext)` เพื่อแปลงรายงานตามการจับคู่งานที่ระบบภายนอกจัดหา การยืนยันตัวตน การถือ token และการส่งเครือข่ายอยู่ภายนอกตัวประเมินและ state ของแล็บ ต้องกำหนดสิทธิ์และการยืนยันผลที่น่าเชื่อถือแยกต่างหาก
 
@@ -51,3 +51,9 @@ Phase 1.2 สร้าง PDF ในเครื่องและให้ผ�
 - ค่าเริ่มต้นอยู่ในหน่วยความจำ เมื่อเลือกเปิดบันทึกจะกู้คืนได้จาก IndexedDB ตาม schema/content validation ดู `PERSISTENCE-AND-PDF.md`
 - รักษารหัสเนื้อหาให้คงที่ เปลี่ยน `contentVersion` เมื่อเปลี่ยนเนื้อหา หากเปลี่ยนสัญญารายงานที่เข้ากันไม่ได้ให้เพิ่ม `schemaVersion`
 - การส่ง Classroom อัตโนมัติ การแปลงเป็นคะแนน และการระบุตัวผู้เรียนยังไม่อยู่ในขอบเขต
+
+## สัญญา V2 ใน Phase 1.3
+
+`sections` แยก `foundation` (10 ข้อ/5 สถานการณ์) กับ `extension` (24 ข้อ/12 สถานการณ์) พร้อมยอด Mastery และ completion ของแต่ละส่วน Task เพิ่ม `title` และ `section`; Lab เพิ่ม `labTitle` จำนวนรวมคำนวณจากเนื้อหา ไม่ตรึงไว้ที่ 10 ข้อ
+
+`LearningReportV2` ใช้ `reportSchemaVersion: 2` เพิ่ม `evidenceLabIds` เลือกหลักฐานเฉพาะแล็บได้โดยผลตรวจรายข้อยังรวมทุกแล็บ Snapshot ข้อมูล V2 เพิ่ม `analysis` ซึ่งมี calculationVersion, n, total, excluded, หน่วย ตัวแปร ช่วงชั้น สถิติ Box Plot สเกลสี บริบทเวลา การระบุภาพจำลอง และฐานดัชนี ตัวส่งออกไม่ต้องอ่าน DOM ข้อมูลดิบอยู่ใน snapshot ของหลักฐาน แต่ไม่มีข้อมูลตัวตนหรือเฉลย

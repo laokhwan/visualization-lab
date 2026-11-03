@@ -2,10 +2,13 @@ import { escapeHtml as esc } from '../ui/html.js';
 import { validateChart } from './validation.js';
 import { yDomain, linearScale, formatNumber, formatPercent } from './scales.js';
 import { barMark, dotMark, lineMark, pieMarks, colorFor } from './marks.js';
+import { isResearch } from '../data/view.js';
+import { researchSvg, researchLegend } from './research.js';
 
 export function chartSvg(data, config, prefix = 'live-svg') {
   const errors = validateChart(data, config);
   if (errors.length) return `<div class="chart-error" role="status"><strong>ยังไม่สามารถแสดงกราฟ</strong><ul>${errors.map(error => `<li>${esc(error)}</li>`).join('')}</ul></div>`;
+  if (isResearch(data)) return researchSvg(data, config, prefix);
   let svg = `<svg viewBox="0 0 640 360" role="group" aria-labelledby="${prefix}-title ${prefix}-desc"><title id="${prefix}-title">${esc(data.title)}</title><desc id="${prefix}-desc">ข้อมูลจำลอง หน่วย ${esc(data.unit)} แตะหรือเลือกจุดข้อมูลเพื่ออ่านค่า มีตารางข้อมูลประกอบด้านล่าง</desc>`;
   if (config.kind === 'pie') return svg + pieMarks(data, config) + `<text x="320" y="337" text-anchor="middle" class="axis-label">สัดส่วนของผลรวม · ${esc(data.unit)}</text></svg>`;
   const left = 76, right = 610, top = 42, bottom = 278;
@@ -40,6 +43,7 @@ export function chartSvg(data, config, prefix = 'live-svg') {
 }
 
 export function legendHtml(data, config) {
+  if (isResearch(data)) { try { return researchLegend(data,config); } catch { return ''; } }
   const total = data.rows.reduce((sum, row) => sum + row.value, 0);
   return data.rows.map((row, i) => `<li><span class="swatch" style="background:${colorFor(config, i)}" aria-hidden="true"></span>${esc(row.label)}${config.labels && config.kind === 'pie' && total > 0 ? ` · ${formatNumber(row.value)} (${formatPercent(row.value / total * 100)}%)` : ''}</li>`).join('');
 }

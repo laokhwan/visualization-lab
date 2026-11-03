@@ -1,3 +1,7 @@
+import { dataView, isResearch, initialConfig } from './data/view.js';
+import { getPath, setPath } from './data/config.js';
+import { researchAnalysis, analysisLines } from './charts/research.js';
+import { researchEditor, readResearchPage } from './ui/research.js';
 import { datasets, copyDataset } from './content/datasets.js';
 import { labs } from './content/labs.js';
 import { createState, current, selectLab, resetGuided, resetChart } from './state.js';
@@ -10,7 +14,7 @@ import { normalizedConfig, yDomain, formatNumber } from './charts/scales.js';
 import { navigationHtml, stageHtml, tableHtml } from './ui/views.js';
 import { questionHtml, experimentsHtml, reflectionStatus, completionFeedbackHtml, completionReviewHtml } from './ui/practice.js';
 import { summaryHtml } from './ui/summary.js';
-import { syncCapabilities, editorRow } from './ui/controls.js';
+import { syncCapabilities, editorRow, controlsHtml } from './ui/controls.js';
 import { escapeHtml as esc, options } from './ui/html.js';
 import { createPersistence } from './storage/controller.js';
 import { storageHtml } from './ui/storage.js';
@@ -37,9 +41,9 @@ function renderNavigation() {
   $('guided-progress').hidden = state.mode === 'free';
   $('storage-panel').hidden = state.mode === 'free';
   if (state.mode === 'guided') {
-    const { totals } = buildLearningSummary(state);
+    const { totals, sections } = buildLearningSummary(state);
     $('progress-text').textContent = `ข้อที่เคยตอบถูก ${totals.masteredQuestionCount} / ${totals.questionCount}`;
-    $('completion-text').textContent = `ทำครบ ${totals.completedTaskCount} / ${totals.taskCount} สถานการณ์ · ${totals.completedLabCount} / ${totals.labCount} แล็บ`;
+    $('completion-text').textContent = `ทำครบ ${totals.completedTaskCount} / ${totals.taskCount} สถานการณ์ · ${totals.completedLabCount} / ${totals.labCount} แล็บ · ${sections.map(s=>`${s.section==='foundation'?'พื้นฐาน':'เพิ่มเติม'} ${s.masteredQuestionCount}/${s.questionCount} ข้อ`).join(' · ')}`;
     $('progress').max = totals.questionCount;
     $('progress').value = totals.masteredQuestionCount;
   }
@@ -55,12 +59,15 @@ function updateChart() {
   $('chart-title').textContent = data.title;
   $('chart').innerHTML = chartSvg(data, config);
   $('legend').innerHTML = legendHtml(data, config);
-  $('data-table').innerHTML = tableHtml(data);
+  $('data-table').innerHTML = tableHtml(data,config);
+  if (isResearch(data)) {
+    try { $('axis-range').textContent = analysisLines(data,config).join(' · '); } catch { $('axis-range').textContent = ''; }
+  }
   $('inspection').textContent = 'เลือกแท่ง จุด หรือส่วนของกราฟเพื่ออ่านค่า';
   const errors = validateChart(data, config);
   const notices = errors.length ? [] : suitability(data, config);
   $('chart-notice').innerHTML = notices.length ? `<div class="notice"><strong>ข้อสังเกต</strong><ul>${notices.map(message => `<li>${esc(message)}</li>`).join('')}</ul></div>` : '';
-  $('axis-range').textContent = errors.length || config.kind === 'pie' ? '' : (() => {
+  if (!isResearch(data)) $('axis-range').textContent = errors.length || config.kind === 'pie' ? '' : (() => {
     const domain = yDomain(data, config);
     return `ช่วงแกนตั้ง: ${formatNumber(domain.min)} ถึง ${formatNumber(domain.max)} ${data.unit}`;
   })();
@@ -83,8 +90,9 @@ function renderStage(focus = false) {
 }
 
 function changeMode(mode, focus = true) {
-  if (!ready) return;
+  if (!ready || state.mode === 'free' && mode === 'free') return;
   if (state.mode === 'guided') persistence.flush();
+  if (state.mode === 'free' && mode !== 'free') { state.free.editorDraft=null; state.free.editorPage=0; }
   state.mode = mode;
   state.view = 'activity';
   renderStage(focus);
@@ -101,7 +109,7 @@ function changed() {
 function syncControlValues() {
   const { config } = active();
   $('controls').querySelectorAll('[data-config]').forEach(input => {
-    const value = config[input.dataset.config];
+    const value = getPath(config,input.dataset.config);
     if (input.type === 'checkbox') input.checked = value;
     else input.value = value ?? '';
   });
@@ -121,12 +129,21 @@ function moveTask(direction) {
 }
 
 function inspectPoint(target) {
-  const mark = target.closest('[data-point]');
+  const mark = target.closest('[data-point], [data-bin], [data-box]');
   if (!mark) return;
   const evidence = mark.closest('[data-evidence]');
   const { draft } = current(state);
   const saved = evidence ? evidence.dataset.evidence === 'completion' ? draft.completion : draft.experiments.find(item => item.slotId === evidence.dataset.evidence) : null;
   const data = saved?.dataset || active().data;
+  if (isResearch(data)) {
+    const config = saved?.config || (mark.closest('#original-chart') ? current(state).task.config : active().config);
+    const output = evidence ? evidence.querySelector('.inspection') : mark.closest('#original-chart') ? $('original-inspection') : $('inspection');
+    const a = researchAnalysis(data,config);
+    if (mark.hasAttribute('data-bin')) { const b=a.histogram.bins[Number(mark.dataset.bin)]; output.textContent=`[${formatNumber(b.lo)}, ${formatNumber(b.hi)}${b.last?']':')'}: ${b.count} รายการ · ความสูง ${formatNumber(b.height)}`; }
+    else if (mark.hasAttribute('data-box')) { output.textContent=analysisLines(data,config,a)[1+Number(mark.dataset.box)]; }
+    else { const rows=dataView(data,config).rows,r=rows[Number(mark.dataset.point)],overlap=config.kind==='scatter'?rows.filter(other=>other.x===r.x&&other.value===r.value).length:1; output.textContent=`${r.label} · ${a.variables.x}: ${r.x} · ${a.variables.y}: ${formatNumber(r.value)}${r.secondValue!==undefined?` · ${a.variables.secondY}: ${formatNumber(r.secondValue)}`:''}${overlap>1?` · ตำแหน่งซ้อนกัน ${overlap} รายการ`:''}`; }
+    return;
+  }
   const row = data.rows[Number(mark.dataset.point)];
   if (!row) return;
   const output = evidence ? evidence.querySelector('.inspection') : mark.closest('#original-chart') ? $('original-inspection') : $('inspection');
@@ -173,8 +190,10 @@ $('navigation').addEventListener('click', event => {
   const dataset = event.target.closest('[data-dataset]');
   if (lab) selectLab(state, lab.dataset.lab);
   else if (dataset) {
+    const wasResearch=isResearch(state.free.dataset);
     state.free.dataset = copyDataset(dataset.dataset.dataset);
-    state.free.config = normalizedConfig(state.free.dataset, state.free.config);
+    state.free.config = isResearch(state.free.dataset) ? initialConfig(state.free.dataset) : normalizedConfig(state.free.dataset, wasResearch ? initialConfig(state.free.dataset) : state.free.config);
+    state.free.editorDraft = null; state.free.editorPage = 0;
   } else return;
   renderStage(true);
 });
@@ -194,8 +213,18 @@ $('stage').addEventListener('change', event => {
   if (state.mode === 'guided' && !current(state).draft.predictionSaved) return;
   const key = input.dataset.config;
   const { config } = active();
-  config[key] = input.type === 'checkbox' ? input.checked : ['baseline', 'upper', 'highlight'].includes(key)
-    ? (input.value === '' ? (key === 'upper' ? null : NaN) : Number(input.value)) : input.value;
+  const value = input.type === 'checkbox' ? input.checked : input.dataset.valueType === 'numbers' ? input.value.split(',').map(v => v.trim() ? Number(v) : NaN) : input.dataset.valueType === 'number' || ['baseline', 'upper', 'highlight'].includes(key) ? (input.value === '' ? (key === 'upper' ? null : NaN) : Number(input.value)) : input.value;
+  setPath(config,key,value);
+  if (isResearch(active().data)) {
+    if (key === 'kind') {
+      if (!Number.isFinite(config.baseline)) config.baseline=0;
+      if (config.upper!==null && (!Number.isFinite(config.upper) || config.upper<=config.baseline)) config.upper=null;
+      config.presentation = config.kind === 'line' && active().data.encoding.secondY ? 'small-multiples' : '2d'; }
+    if (key === 'color.schemeType') { const type = value === 'categorical' ? 'nominal' : 'quantitative'; const fields = active().data.fields.filter(f => f.type === type); if (!fields.some(f => f.id === config.color.field) && fields.length) config.color.field = fields[0].id; }
+    const panel = $('experiment-controls') || $('controls');
+    panel.innerHTML = (state.mode === 'guided' ? '<legend class="sr-only">ตัวควบคุมกราฟ</legend>' : '')+controlsHtml(active().data,config,[],state.mode === 'free');
+    $(input.id)?.focus({preventScroll:true});
+  }
   changed();
   updateChart();
 });
@@ -221,8 +250,15 @@ $('stage').addEventListener('change', event => {
 
 $('stage').addEventListener('click', event => {
   const target = event.target.closest('button');
-  if (event.target.closest('[data-point]')) inspectPoint(event.target);
+  if (event.target.closest('[data-point], [data-bin], [data-box]')) inspectPoint(event.target);
   if (!target) return;
+  if (target.hasAttribute('data-editor-page') && state.mode === 'free') {
+    state.free.editorDraft ??= structuredClone(state.free.dataset);
+    readResearchPage($('research-data-form'),state.free.editorDraft);
+    state.free.editorPage = Number(target.dataset.editorPage);
+    $('data-editor').outerHTML=researchEditor(state.free.editorDraft,state.free.editorPage);
+    return;
+  }
   if (target.hasAttribute('data-task')) {
     state.taskIndex = Number(target.dataset.task);
     renderStage(true);
@@ -284,7 +320,8 @@ $('stage').addEventListener('click', event => {
     if (state.mode === 'free') {
       const data = copyDataset(state.free.dataset.id);
       state.free.dataset = data;
-      state.free.config = normalizedConfig(data, { kind: 'bar', palette: 'uniform', highlight: 2, baseline: 0, upper: null, labels: true });
+      state.free.config = isResearch(data) ? initialConfig(data) : normalizedConfig(data, { kind: 'bar', palette: 'uniform', highlight: 2, baseline: 0, upper: null, labels: true });
+      state.free.editorDraft = null; state.free.editorPage = 0;
       // Rebuild the editor because reset also restores the sample data.
       renderStage();
       $('reset-chart').focus({ preventScroll: true });
@@ -292,6 +329,7 @@ $('stage').addEventListener('click', event => {
       const { task, draft } = current(state);
       resetChart(task, draft);
       changed();
+      if (isResearch(active().data)) { const panel=$('experiment-controls'); panel.innerHTML='<legend class="sr-only">ตัวควบคุมกราฟ</legend>'+controlsHtml(active().data,draft.config,[],false); }
       syncControlValues();
       updateChart();
     }
@@ -321,7 +359,7 @@ $('stage').addEventListener('click', event => {
 });
 
 $('stage').addEventListener('keydown', event => {
-  if (event.target.closest('[data-point]') && ['Enter', ' '].includes(event.key)) {
+  if (event.target.closest('[data-point], [data-bin], [data-box]') && ['Enter', ' '].includes(event.key)) {
     event.preventDefault();
     inspectPoint(event.target);
   }
@@ -344,6 +382,17 @@ $('stage').addEventListener('submit', event => {
     $(`${questionId}-feedback`).focus({ preventScroll: true });
     $('practice-announcement').textContent = result.correct ? 'คำตอบผ่านเกณฑ์แล้ว และบันทึกจำนวนครั้งแล้ว' : 'บันทึกความพยายามแล้ว โปรดทบทวนคำแนะนำและลองอีกครั้ง';
     return;
+  }
+  if (event.target.id === 'research-data-form' && state.mode === 'free') {
+    event.preventDefault();
+    state.free.editorDraft ??= structuredClone(state.free.dataset);
+    readResearchPage(event.target,state.free.editorDraft);
+    const errors = validateDataset(state.free.editorDraft);
+    if (errors.length) { $('data-errors').textContent=errors.join(' · '); return; }
+    state.free.dataset=structuredClone(state.free.editorDraft);
+    event.target.querySelectorAll('[aria-readonly="true"]').forEach(input=>{input.value=state.free.dataset.records[Number(input.dataset.record)][input.dataset.field]??'';});
+    updateChart();
+    $('data-errors').textContent='นำข้อมูลไปใช้แล้ว; ค่าที่ขาดจะถูกแยกออกตามตัวแปรที่กราฟต้องใช้'; return;
   }
   if (event.target.id !== 'data-form') return;
   event.preventDefault();

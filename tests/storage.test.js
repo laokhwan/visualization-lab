@@ -10,6 +10,16 @@ import { prepareTask } from './helpers/learning.js';
 
 const preferences = () => { const values = new Map(); return { getItem: key => values.get(key) || null, setItem: (key, value) => values.set(key, value), removeItem: key => values.delete(key) }; };
 
+test('saved status waits for the latest queued write and debounced draft', async () => {
+  const state=createState(),controller=createPersistence({state,basePath:'/queue/',preferences:preferences(),indexedDBFactory:new IDBFactory()});
+  await controller.initialize();await controller.enable();
+  state.guided.choose.compare.note='first';const first=controller.save();
+  state.guided.choose.compare.note='latest';const second=controller.save();
+  await first;assert.notEqual(controller.getInfo().status,'saved');await second;assert.equal(controller.getInfo().status,'saved');
+  const prior=controller.save();state.guided.choose.compare.note='pending';controller.save({draft:true});await prior;assert.equal(controller.getInfo().status,'pending');
+  await controller.flush();assert.equal(controller.getInfo().status,'saved');
+});
+
 test('round-trip restores history, evidence and historical completion but never Free', () => {
   const state = createState();
   prepareTask(state);

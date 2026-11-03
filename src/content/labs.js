@@ -1,3 +1,4 @@
+import { extraTasks } from './expansion.js';
 const defaultConfig = { kind: 'bar', palette: 'uniform', highlight: 2, labels: true, baseline: 0, upper: null };
 export const labs = [
   {
@@ -56,6 +57,8 @@ export const labs = [
       ] }],
   },
 ];
+
+for (const lab of labs) lab.tasks.push(...extraTasks[lab.id]);
 
 export const predictions = {
   color: [['', 'เลือกคำตอบก่อนทดลอง'], ['uniform', 'ใช้สีเดียวทุกห้อง'], ['highlight', 'ใช้สีเด่นเฉพาะห้อง C'], ['categorical', 'ใช้สีต่างกันทุกห้อง']],

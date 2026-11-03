@@ -2,6 +2,8 @@ import { questions } from '../content/questions.js';
 import { chartSvg } from '../charts/render.js';
 import { formatNumber } from '../charts/scales.js';
 import { reportWarning } from './model.js';
+import { isResearch } from '../data/view.js';
+import { analysisLines } from '../charts/research.js';
 
 export const pdfFontNames = { Sarabun: { normal: 'Sarabun-Regular.ttf', bold: 'Sarabun-Bold.ttf', italics: 'Sarabun-Regular.ttf', bolditalics: 'Sarabun-Bold.ttf' } };
 const yes = status => status === 'complete' ? 'ครบ' : 'ยังไม่ครบ';
@@ -20,15 +22,15 @@ export function exportChartSvg(snapshot, prefix) {
     .replace(/<(title|desc)\b[^>]*>[\s\S]*?<\/\1>/g, '')
     .replace(/<circle class="hit-area"[^>]*\/>/g, '')
     .replace(/class="([^"]+)"/g, (_, names) => `style="${names.split(' ').map(name => styles[name] || '').filter(Boolean).join(';')}"`)
-    .replace(/\s(?:aria-[\w-]+|tabindex|role|data-point|pointer-events)="[^"]*"/g, '');
+    .replace(/\s(?:aria-[\w-]+|tabindex|role|data-[\w-]+|pointer-events)="[^"]*"/g, '');
 }
 
 function chartBlock(snapshot, title, id) {
   return [{ unbreakable: true, stack: [
     { text: title, style: 'subheading', margin: [0, 10, 0, 4] },
     { svg: exportChartSvg(snapshot, id), width: 500 },
-    { text: snapshot.dataset.rows.map(row => `${row.label}: ${formatNumber(row.value)} ${snapshot.dataset.unit}`).join(' · '), color: '#24354a', fontSize: 10 },
-    { text: snapshot.config.kind === 'pie' ? 'กราฟวงกลมแสดงสัดส่วนของผลรวม' : `จุดเริ่มแกน: ${formatNumber(snapshot.config.baseline)} · จุดสิ้นสุด: ${snapshot.config.upper === null ? 'อัตโนมัติ' : formatNumber(snapshot.config.upper)}`, fontSize: 10, color: '#526175' },
+    { text: isResearch(snapshot.dataset) ? analysisLines(snapshot.dataset,snapshot.config).join('\n') : snapshot.dataset.rows.map(row => `${row.label}: ${formatNumber(row.value)} ${snapshot.dataset.unit}`).join(' · '), color: '#24354a', fontSize: 10 },
+    { text: isResearch(snapshot.dataset) ? 'ข้อมูลจำลอง · การตรวจการตั้งค่าไม่ใช่การรับรองความเข้าใจทั้งหมด' : snapshot.config.kind === 'pie' ? 'กราฟวงกลมแสดงสัดส่วนของผลรวม' : `จุดเริ่มแกน: ${formatNumber(snapshot.config.baseline)} · จุดสิ้นสุด: ${snapshot.config.upper === null ? 'อัตโนมัติ' : formatNumber(snapshot.config.upper)}`, fontSize: 10, color: '#526175' },
   ] }];
 }
 
@@ -44,9 +46,11 @@ export function buildPdfDefinition(report) {
     { text: `เคยผ่านข้อประเมิน ${totals.masteredQuestionCount}/${totals.questionCount} ข้อ\nทำครบ ${totals.completedTaskCount}/${totals.taskCount} สถานการณ์ · ${totals.completedLabCount}/${totals.labCount} แล็บ\nส่งคำตอบ ${totals.attemptCount} ครั้ง · ตอบผิด ${totals.incorrectAttemptCount} ครั้ง`, margin: [0, 8, 0, 10] },
     { text: 'Mastery แสดงว่าเคยตอบข้อประเมินถูกต้อง การตอบผิดระหว่างฝึกไม่หักผลที่เคยผ่าน ส่วนการทำครบรวมเกณฑ์กราฟและการกรอกสะท้อนคิด ไม่ใช่การประเมินความหมายของข้อความ', color: '#526175', fontSize: 11 },
     { text: 'ผลการตรวจอัตโนมัติ', style: 'heading', margin: [0, 16, 0, 8] },
+    ...report.summary.sections.map(s=>({text:`${s.section==='foundation'?'กิจกรรมพื้นฐาน':'กิจกรรมเพิ่มเติม'}: เคยผ่าน ${s.masteredQuestionCount}/${s.questionCount} ข้อ · ทำครบ ${s.completedTaskCount}/${s.taskCount} สถานการณ์`,fontSize:11})),
+    {text:'ผลรายข้อรวมทุกแล็บ; หลักฐานกราฟตามขอบเขตที่เลือก: '+report.evidenceLabIds.join(', '),fontSize:10,color:'#526175'},
   ];
   for (const lab of report.summary.labs) {
-    const title = report.evidence.find(item => item.labId === lab.labId)?.labTitle || lab.labId;
+    const title = lab.labTitle;
     for (const [taskIndex, task] of lab.tasks.entries()) {
       content.push({ unbreakable: true, stack: [
         ...(taskIndex === 0 ? [{ text: title, style: 'subheading', margin: [0, 12, 0, 5] }, { text: `ข้อประเมิน: ${mastered(lab.masteryStatus)} · กิจกรรม: ${yes(lab.completionStatus)}`, fontSize: 11 }] : []),

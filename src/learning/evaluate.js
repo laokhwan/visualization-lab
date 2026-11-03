@@ -1,5 +1,6 @@
 import { datasets } from '../content/datasets.js';
 import { validateChart } from '../charts/validation.js';
+import { designRule } from './design-rules.js';
 
 export function evaluateDesign(task, config) {
   const criteria = task.criteria.map(rule => ({
@@ -7,7 +8,7 @@ export function evaluateDesign(task, config) {
     hint: rule.hint,
     passed: rule.test === 'honestAxis'
       ? config.kind !== 'bar' || config.baseline === 0
-      : rule.values.includes(config[rule.key]),
+      : rule.test ? designRule(rule.test, datasets[task.dataset], config) : rule.values.includes(config[rule.key]),
   }));
   const errors = validateChart(datasets[task.dataset], config);
   criteria.push({ label: 'ช่วงแกนและข้อมูลแสดงได้ถูกต้อง', passed: errors.length === 0, hint: errors.join(' · ') });

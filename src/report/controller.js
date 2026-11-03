@@ -6,7 +6,7 @@ export function createReportController({ state, stage, flush = async () => {} })
   const $ = id => stage.querySelector(`#${id}`);
   function dispose() { token++; if (url) URL.revokeObjectURL(url); url = blob = null; }
   stage.addEventListener('change', event => {
-    if (event.target.id === 'report-drafts') {
+    if (['report-drafts','report-scope'].includes(event.target.id)) {
       dispose();
       if ($('pdf-actions')) $('pdf-actions').hidden = true;
       if ($('pdf-status')) $('pdf-status').textContent = 'เปลี่ยนตัวเลือกรายงานแล้ว กรุณาสร้าง PDF ใหม่';
@@ -15,7 +15,7 @@ export function createReportController({ state, stage, flush = async () => {} })
   stage.addEventListener('click', async event => {
     const id = event.target.closest('button')?.id;
     if (id === 'preview-report') {
-      const report = buildLearningReport(state, { includeDrafts: $('report-drafts').checked });
+      const report = buildLearningReport(state, { includeDrafts: $('report-drafts').checked, ...($('report-scope').value !== 'all' ? {labIds:[$('report-scope').value]} : {}) });
       const template = document.createElement('div');
       template.innerHTML = reportHtml(report);
       $('report-preview').innerHTML = template.querySelector('#report-preview').innerHTML;
@@ -23,7 +23,7 @@ export function createReportController({ state, stage, flush = async () => {} })
     } else if (id === 'generate-pdf') {
       dispose();
       const currentToken = token;
-      const report = buildLearningReport(state, { includeDrafts: $('report-drafts').checked });
+      const report = buildLearningReport(state, { includeDrafts: $('report-drafts').checked, ...($('report-scope').value !== 'all' ? {labIds:[$('report-scope').value]} : {}) });
       const button = $('generate-pdf');
       button.disabled = true; $('pdf-actions').hidden = true;
       $('pdf-status').textContent = 'กำลังสร้าง PDF บนเครื่องนี้ กรุณารอสักครู่';

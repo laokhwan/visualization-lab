@@ -1,3 +1,4 @@
+import { extraHints } from './expansion.js';
 const comparison = [
   'กลับไปอ่านค่าของแต่ละห้องจากตาราง แล้วเปรียบเทียบกับสิ่งที่มองเห็นในกราฟ',
   'แยกให้ออกว่าข้อมูลเป็นหมวดหมู่ ลำดับต่อเนื่อง หรือส่วนประกอบของยอดรวมเดียวกัน',
@@ -30,3 +31,4 @@ export const hints = {
   'axis-perception': axis, 'axis-principles': axis,
   'redesign-choice': redesign, 'redesign-principles': redesign,
 };
+Object.assign(hints, extraHints);

@@ -1,3 +1,4 @@
+import { prepareExperiments } from './helpers/learning.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { labs } from '../src/content/labs.js';
@@ -12,11 +13,7 @@ import { questionHtml } from '../src/ui/practice.js';
 function unlock(task, draft) {
   draft.prediction = 'คาดการณ์ที่อาจไม่ถูกต้อง';
   savePrediction(draft);
-  for (const slot of task.experiment) {
-    if (slot.design) Object.assign(draft.config, { kind: 'dot', palette: 'uniform', baseline: 70 });
-    else for (const [key, values] of Object.entries(slot.match)) draft.config[key] = values[0];
-    assert.equal(recordExperiment(task, draft).accepted, true);
-  }
+  prepareExperiments(task,draft);
 }
 
 function master(task, draft) {
@@ -26,11 +23,11 @@ function master(task, draft) {
   }
 }
 
-test('all ten question definitions and task references are complete and unique', () => {
+test('all 34 question definitions and task references are complete and unique', () => {
   assert.deepEqual(validateQuestionDefinitions(), []);
   const ids = labs.flatMap(lab => lab.tasks.flatMap(task => task.questionIds));
-  assert.equal(ids.length, 10);
-  assert.equal(new Set(ids).size, 10);
+  assert.equal(ids.length, 34);
+  assert.equal(new Set(ids).size, 34);
   assert.ok(ids.every(id => questions[id]));
   const bad = structuredClone(questions);
   bad['compare-reason'].options[0].id = 'b';
@@ -146,7 +143,7 @@ test('incorrect feedback never labels correct subsets or exposes explanations', 
   assert.ok(questionHtml(id, progress, 1).includes(questions[id].options[0].explanation));
 });
 
-test('all five scenarios unlock and complete without grading free text', () => {
+test('all 17 scenarios unlock and complete without grading free text', () => {
   const state = createState();
   for (const lab of labs) for (const task of lab.tasks) {
     const draft = state.guided[lab.id][task.id];
@@ -162,7 +159,7 @@ test('all five scenarios unlock and complete without grading free text', () => {
     assert.equal(completeTask(task, draft).accepted, true);
   }
   assert.equal(completedLabs(state), 4);
-  assert.deepEqual(buildLearningSummary(state).totals, { questionCount: 10, masteredQuestionCount: 10, taskCount: 5, completedTaskCount: 5, labCount: 4, completedLabCount: 4, attemptCount: 10, incorrectAttemptCount: 0 });
+  assert.deepEqual(buildLearningSummary(state).totals, { questionCount: 34, masteredQuestionCount: 34, taskCount: 17, completedTaskCount: 17, labCount: 4, completedLabCount: 4, attemptCount: 34, incorrectAttemptCount: 0 });
 });
 
 test('mastery is separate from current chart validation and historical completion', () => {
@@ -226,7 +223,7 @@ test('navigation preserves independent drafts by stable task IDs', () => {
 
 test('summary is deterministic, identity-free and includes unstarted questions', () => {
   const state = createState(), { task, draft } = current(state);
-  assert.equal(buildLearningSummary(state).totals.questionCount, 10);
+  assert.equal(buildLearningSummary(state).totals.questionCount, 34);
   unlock(task, draft);
   const id = task.questionIds[0], progress = draft.questions[id];
   progress.selectedOptionIds = ['a'];
@@ -246,7 +243,7 @@ test('summary is deterministic, identity-free and includes unstarted questions',
   assert.equal(JSON.stringify(state), before);
   const json = JSON.stringify(summary);
   for (const forbidden of ['PRIVATE_REFLECTION', 'correctOptionIds', 'selectedOptionIds', 'history', 'studentId', 'email', 'prediction']) assert.ok(!json.includes(forbidden));
-  assert.equal(summary.schemaVersion, 1);
+  assert.equal(summary.schemaVersion, 2);
   assert.equal(summary.integrity, 'browser-unverified');
 });
 

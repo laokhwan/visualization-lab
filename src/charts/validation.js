@@ -1,4 +1,7 @@
+import { isResearch } from '../data/view.js';
+import { validateResearchDataset, validateResearchChart } from './research-validation.js';
 export function validateDataset(data) {
+  if (isResearch(data)) return validateResearchDataset(data);
   const errors = [];
   if (!data.title?.trim()) errors.push('ระบุชื่อกราฟ');
   if (!data.unit?.trim()) errors.push('ระบุหน่วยของข้อมูล');
@@ -14,6 +17,7 @@ export function validateDataset(data) {
 }
 
 export function validateChart(data, config) {
+  if (isResearch(data)) return validateResearchChart(data, config);
   const errors = validateDataset(data);
   if (!['bar', 'line', 'dot', 'pie'].includes(config.kind)) errors.push('เลือกชนิดกราฟที่รองรับ');
   if (config.kind === 'pie') {
@@ -28,6 +32,7 @@ export function validateChart(data, config) {
 }
 
 export function suitability(data, config) {
+  if (isResearch(data)) return ['ข้อมูลจำลอง ไม่ใช่ผลวิจัยจริง และไม่ยืนยันเหตุและผล', ...(config.presentation === '3d' ? ['ภาพประกอบจำลอง 3 มิติ ความลึกไม่ได้แทนตัวแปรที่วัด'] : []), ...(config.kind === 'histogram' ? ['ช่วงชั้นรวมขอบซ้าย ไม่รวมขอบขวา ยกเว้นช่วงสุดท้ายรวมขอบขวา; ช่วงกว้างไม่เท่ากันใช้ความหนาแน่นความถี่'] : []), ...(config.kind === 'box' ? ['ควอร์ไทล์: R type 7; หนวดเป็นค่าจริงในขอบเขต 1.5 IQR; ค่านอกเกณฑ์ไม่ใช่ค่าผิดโดยอัตโนมัติ'] : []), ...(config.color?.schemeType === 'diverging' ? ['จุดอ้างอิงสีต้องมีความหมาย; 30°C ในบทเรียนเป็นค่าอ้างอิงสมมติ ไม่ใช่เกณฑ์ความปลอดภัย'] : [])];
   const messages = [];
   if (config.kind === 'pie' && !data.partToWhole) messages.push('ข้อมูลนี้ไม่ใช่ส่วนประกอบของผลรวม การแปลงเป็นสัดส่วนอาจสื่อความหมายคลาดเคลื่อน');
   if (config.kind === 'line' && data.xType === 'category') messages.push('เส้นเชื่อมอาจสื่อว่าหมวดหมู่มีลำดับต่อเนื่อง ควรพิจารณากราฟแท่งหรือกราฟจุด');

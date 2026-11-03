@@ -29,16 +29,16 @@
 - `src/storage/database.js`: IndexedDB transaction, append-only attempt records และ compare-and-swap revision
 - `src/storage/controller.js`: opt-in, write queue, debounce, status, reset, recovery และการปิดบันทึก
 - `src/content/hints.js`, `src/learning/feedback.js`: ข้อความ 3 ระดับและการเลือกจาก streak ของคำตอบผิด
-- `src/report/model.js`: `LearningReportV1` ที่แยกจาก `LearningSummaryV1`
+- `src/report/model.js`: `LearningReportV2` ที่แยกจาก `LearningSummaryV2`
 - `src/report/pdf.js`, `src/report/controller.js`: document definition, local engine, Blob/download/share และการคืน object URL
 
 IndexedDB มี stores `meta`, `tasks`, `attempts` หลักฐานและข้อความอยู่ใน task records ประวัติเก็บแยกตาม task/question/attemptNumber จึงไม่เขียนประวัติทั้งหมดใหม่ทุกครั้งที่พิมพ์ ไม่มี bitmap หรือ PDF Blob ใน storage
 
 การกู้คืนสร้าง state ที่รู้จักใหม่ ตรวจ IDs, selections, text limits, graph config, dataset snapshots, attempt references และ completion checkpoints แล้ว replay ประวัติด้วยตัวประเมินปัจจุบัน ไม่เชื่อ mastery/count/correct flags ที่บันทึกมา การตรวจเหล่านี้เป็นการตรวจความสอดคล้อง ไม่ใช่การป้องกันผลปลอม
 
-`storageSchemaVersion` เป็น 1 ส่วน `contentVersion` เป็นรุ่นเนื้อหาที่แสดงในรายงาน `assessmentManifest` แยกแต่ละ task โดยมี version และ fingerprint ของคำถาม ข้อมูล เกณฑ์ และรูปแบบทดลอง เปลี่ยน UI หรือคำใบ้โดยไม่เปลี่ยนส่วนประเมินจะไม่ลบ Mastery เมื่อเปลี่ยนตรรกะที่อยู่นอกนิยามข้อมูล ให้เพิ่ม assessment engine/task version ใน schema module ด้วย
+`storageSchemaVersion` เป็น 2 (อ่านและย้าย V1 ได้) ส่วน `contentVersion` เป็นรุ่นเนื้อหาที่แสดงในรายงาน `assessmentManifest` แยกแต่ละ task โดยมี version และ fingerprint ของคำถาม ข้อมูล เกณฑ์ และรูปแบบทดลอง เปลี่ยน UI หรือคำใบ้โดยไม่เปลี่ยนส่วนประเมินจะไม่ลบ Mastery เมื่อเปลี่ยนตรรกะที่อยู่นอกนิยามข้อมูล ให้เพิ่ม assessment engine/task version ใน schema module ด้วย
 
-การส่งคำตอบหรือบันทึกหลักฐานจะเข้าคิวทันที ข้อความร่างหน่วง 500 มิลลิวินาทีและ flush เมื่อออกจากช่อง/เปลี่ยนโหมดหรือซ่อนหน้า สถานะ saved แสดงหลัง transaction complete เท่านั้น การปิดแอปก่อน transaction จบยังอาจทำให้ข้อมูลล่าสุดไม่ถูกบันทึก
+การส่งคำตอบหรือบันทึกหลักฐานจะเข้าคิวทันที ข้อความร่างหน่วง 500 มิลลิวินาทีและ flush เมื่อออกจากช่อง/เปลี่ยนโหมดหรือซ่อนหน้า สถานะ saved แสดงหลัง transaction ของข้อมูลล่าสุด complete และไม่มีข้อความร่าง/งานใหม่รออยู่เท่านั้น การปิดแอปก่อน transaction จบยังอาจทำให้ข้อมูลล่าสุดไม่ถูกบันทึก
 
 ## การจัดเตรียม PDF
 
@@ -69,3 +69,13 @@ node tools/check-pdf.mjs
 - PDF เป็น snapshot ณ เวลาสร้าง ไม่เปลี่ยนตามการฝึกภายหลัง ต้องสร้างใหม่เมื่อต้องการข้อมูลล่าสุด
 - ทุกหน้าระบุว่าผลจากเบราว์เซอร์แก้ไขได้และไม่ใช่ผลการเรียนที่ยืนยันแล้ว ไม่มี digital signature หรือการส่งคะแนน
 - PDF มีข้อความและกราฟเวกเตอร์ แต่ยังไม่ได้รับรองมาตรฐาน PDF/UA ใช้หน้าสรุป HTML และตารางเป็นทางเลือกที่เข้าถึงได้
+
+## การขยายเนื้อหา Phase 1.3
+
+- รุ่น payload ปัจจุบัน `storageSchemaVersion: 2` และเนื้อหา `practice-1.3`; IndexedDB ยังคงใช้ database version 1 กับ stores เดิม ไม่สร้างฐานข้อมูลเพิ่ม
+- รับ payload V1 ผ่านการย้ายแบบเพิ่มกิจกรรม รักษา fingerprint ของ 5 สถานการณ์เดิม จากนั้นเขียน V2 ในการบันทึกครั้งถัดไป ไม่เขียนทับข้อมูลรุ่นที่ไม่รู้จัก
+- กิจกรรมเพิ่มเติมที่ไม่มีใน V1 เริ่มว่าง ไม่ถือเป็นข้อมูลเสีย ทดสอบด้วย `tests/fixtures/progress-v1.json` ที่เก็บจากโค้ดรุ่นก่อน
+- เกณฑ์ที่เปลี่ยนยังแยกกักเป็นรายสถานการณ์และรอการยืนยัน การเปลี่ยนวิธีคำนวณต้องเปลี่ยน `calculationVersion` เพื่อเปลี่ยน fingerprint ของเนื้อหาใหม่
+- หน้าสรุปแยกพื้นฐานและเพิ่มเติม การเพิ่มบทเรียนไม่ลบ Mastery เดิม
+- PDF เลือกหลักฐานทุกแล็บหรือเฉพาะแล็บได้ ผลรายข้อยังรวมทั้งหมด และไฟล์ใช้กติกาสถิติเดียวกับหน้าจอ
+- รุ่นก่อนหน้าไม่สามารถอ่าน V2 ได้ ควรใช้เว็บรุ่นปัจจุบันต่อหลังย้ายข้อมูล ไม่ลดรุ่นเว็บระหว่างเรียน

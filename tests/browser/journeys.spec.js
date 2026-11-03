@@ -107,9 +107,9 @@ test('all four labs, ten questions and five tasks complete and review', async ({
     await expect(page.locator('#completion-feedback')).toContainText('ทำกิจกรรมครบแล้ว');
   }
   await expect(page.locator('#progress')).toHaveAttribute('value', '10');
-  await expect(page.locator('#completion-text')).toContainText('5 / 5 สถานการณ์ · 4 / 4 แล็บ');
+  await expect(page.locator('#completion-text')).toContainText('5 / 17 สถานการณ์ · 0 / 4 แล็บ');
   await page.locator('#show-summary').click();
-  await expect(page.locator('.summary-metrics')).toContainText('10 / 10');
+  await expect(page.locator('.summary-metrics')).toContainText('10 / 34');
   await expect(page.locator('.summary-lab')).toHaveCount(4);
   await page.locator('[data-review-lab="choose"][data-review-task="compare"]').click();
   await page.locator('#completed-review summary').first().click();
@@ -227,7 +227,7 @@ test('responsive question controls, keyboard, report and session-only privacy', 
   expect(minTarget).toBeGreaterThanOrEqual(44);
   await question.screenshot({ path: `artifacts/${testInfo.project.name}-practice.png` });
   await page.locator('#show-summary').click();
-  await expect(page.locator('.summary-metrics')).toContainText('1 / 10');
+  await expect(page.locator('.summary-metrics')).toContainText('1 / 34');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.locator('#stage').screenshot({ path: `artifacts/${testInfo.project.name}-summary.png` });
   await page.locator('[data-mode="free"]').click();

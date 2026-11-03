@@ -5,7 +5,7 @@ export function createPersistence({ state, basePath, onChange = () => {}, prefer
   try { preferences ||= globalThis.localStorage; }
   catch { preferences = { getItem() { throw new Error('Storage blocked'); } }; }
   const names = storageNames(basePath);
-  let db, revision = 0, queue = Promise.resolve(), timer, epoch = 0;
+  let db, revision = 0, queue = Promise.resolve(), timer, epoch = 0, saveSequence = 0;
   let enabled = false, blocked = false, needsReplacement = false;
   let info = { status: 'off', enabled: false, blocked: false, message: 'ยังไม่เปิดบันทึก ข้อมูลอยู่ในหน้านี้และหายเมื่อโหลดใหม่' };
   const emit = (status, message) => { info = { status, enabled, blocked, message }; onChange(info); };
@@ -31,13 +31,14 @@ export function createPersistence({ state, basePath, onChange = () => {}, prefer
         state.taskIndex = restored.state.taskIndex;
       }
       needsReplacement = restored.status === 'partial';
-      emit(blocked ? 'recovery' : 'restored', blocked ? restored.warnings.join(' · ') + ' · ยังไม่เขียนทับข้อมูลเดิม' : 'กู้คืนความคืบหน้าแล้ว ตรวจว่าเป็นการฝึกของคุณก่อนเรียนต่อบนเครื่องที่ใช้ร่วมกัน');
+      emit(blocked ? 'recovery' : 'restored', blocked ? restored.warnings.join(' · ') + ' · ยังไม่เขียนทับข้อมูลเดิม' : `กู้คืนความคืบหน้าแล้ว${restored.migrated?' และเตรียมข้อมูลสำหรับกิจกรรมเพิ่มเติมโดยรักษาผลเดิม':''} ตรวจว่าเป็นการฝึกของคุณก่อนเรียนต่อบนเครื่องที่ใช้ร่วมกัน`);
     } catch (exception) { blocked = true; emit('error', 'เปิดพื้นที่บันทึกไม่ได้ ใช้หน้านี้ต่อได้ แต่ข้อมูลใหม่ยังไม่ถูกบันทึก'); }
   }
 
   function save({ draft = false } = {}) {
     clearTimeout(timer);
     if (!enabled || blocked) return queue;
+    const sequence = ++saveSequence;
     if (draft) { emit('pending', 'กำลังเตรียมบันทึกข้อความ'); timer = setTimeout(() => save(), 500); return queue; }
     const token = epoch;
     const payload = serializeProgress(state);
@@ -46,7 +47,8 @@ export function createPersistence({ state, basePath, onChange = () => {}, prefer
       if (token !== epoch || !enabled || blocked) return;
       try {
         revision = await writeDatabase(await ensureDb(), payload, revision);
-        if (token === epoch) emit('saved', 'บันทึกแล้วบนเครื่องนี้');
+        // An older transaction must not say "saved" while a newer draft/write is pending.
+        if (token === epoch && sequence === saveSequence) emit('saved', 'บันทึกแล้วบนเครื่องนี้');
       } catch (exception) { if (token === epoch) error(exception); }
     });
     return queue;

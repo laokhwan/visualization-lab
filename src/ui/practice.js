@@ -6,6 +6,8 @@ import { questionCounts } from '../learning/practice.js';
 import { experimentComplete } from '../learning/experiments.js';
 import { chartSvg, legendHtml } from '../charts/render.js';
 import { adaptiveFeedback } from '../learning/feedback.js';
+import { isResearch } from '../data/view.js';
+import { researchTable } from './research.js';
 
 export function questionHtml(id, progress, index) {
   const question = questions[id];
@@ -24,7 +26,7 @@ export function questionHtml(id, progress, index) {
 }
 
 export function evidenceHtml(snapshot, prefix, key) {
-  return `<div data-evidence="${esc(key)}"><div class="chart-scroll" tabindex="0" aria-label="กราฟที่บันทึก เลื่อนแนวนอนได้">${chartSvg(snapshot.dataset, snapshot.config, prefix)}</div><ul class="legend">${legendHtml(snapshot.dataset, snapshot.config)}</ul><p class="inspection" role="status">เลือกข้อมูลในกราฟที่บันทึกเพื่ออ่านค่า</p></div>`;
+  return `<div data-evidence="${esc(key)}"><div class="chart-scroll" tabindex="0" aria-label="กราฟที่บันทึก เลื่อนแนวนอนได้">${chartSvg(snapshot.dataset, snapshot.config, prefix)}</div><ul class="legend">${legendHtml(snapshot.dataset, snapshot.config)}</ul><p class="inspection" role="status">เลือกข้อมูลในกราฟที่บันทึกเพื่ออ่านค่า</p>${isResearch(snapshot.dataset)?`<details><summary>สถิติและข้อมูลของหลักฐานนี้</summary><div class="table-scroll">${researchTable(snapshot.dataset,snapshot.config)}</div></details>`:''}</div>`;
 }
 
 export function experimentsHtml(task, draft) {

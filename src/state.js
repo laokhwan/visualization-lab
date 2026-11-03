@@ -3,7 +3,7 @@ import { copyDataset } from './content/datasets.js';
 import { createQuestionProgress } from './learning/practice.js';
 
 export function createDraft(task) {
-  return { config: { ...task.config }, prediction: '', predictionSaved: false, note: '', note2: '', experiments: [], questions: Object.fromEntries(task.questionIds.map(id => [id, createQuestionProgress()])), completion: null, completionFeedback: null };
+  return { config: structuredClone(task.config), prediction: '', predictionSaved: false, note: '', note2: '', experiments: [], questions: Object.fromEntries(task.questionIds.map(id => [id, createQuestionProgress()])), completion: null, completionFeedback: null };
 }
 
 function createGuided() {
@@ -42,6 +42,6 @@ export function resetGuided(state) {
 }
 
 export function resetChart(task, draft) {
-  draft.config = { ...task.config };
+  draft.config = structuredClone(task.config);
   draft.completionFeedback = null;
 }

@@ -4,7 +4,7 @@ import { questionCounts, taskMastered } from './practice.js';
 import { experimentComplete } from './experiments.js';
 import { evaluateDesign } from './evaluate.js';
 
-/** LearningSummaryV1: identity-free DTO for UI and future PDF/Classroom adapters.
+/** LearningSummaryV2: identity-free DTO for UI and future PDF/Classroom adapters.
  * No answer keys, selected answers, predictions, or reflection text are exposed.
  */
 export function buildLearningSummary(state) {
@@ -22,7 +22,7 @@ export function buildLearningSummary(state) {
         };
       });
       return {
-        labId: lab.id, taskId: task.id,
+        labId: lab.id, taskId: task.id, title: task.title || task.mission, section: task.section || 'foundation',
         masteryStatus: taskMastered(task, draft) ? 'mastered' : 'not-mastered',
         completionStatus: draft.completion ? 'complete' : 'incomplete',
         experimentStatus: experimentComplete(task, draft) ? 'complete' : 'incomplete',
@@ -36,7 +36,7 @@ export function buildLearningSummary(state) {
     });
     const all = tasks.flatMap(task => task.questions);
     return {
-      labId: lab.id, masteryStatus: tasks.every(task => task.masteryStatus === 'mastered') ? 'mastered' : 'not-mastered',
+      labId: lab.id, labTitle: lab.title, masteryStatus: tasks.every(task => task.masteryStatus === 'mastered') ? 'mastered' : 'not-mastered',
       completionStatus: tasks.every(task => task.completionStatus === 'complete') ? 'complete' : 'incomplete',
       attemptCount: all.reduce((sum, item) => sum + item.attemptCount, 0),
       incorrectAttemptCount: all.reduce((sum, item) => sum + item.incorrectAttemptCount, 0), tasks,
@@ -46,7 +46,8 @@ export function buildLearningSummary(state) {
   const all = tasks.flatMap(task => task.questions);
   const reference = item => ({ labId: item.labId, taskId: item.taskId, questionId: item.questionId });
   return {
-    schemaVersion: 1, contentVersion, labs: reportLabs,
+    schemaVersion: 2, contentVersion, labs: reportLabs,
+    sections: ['foundation','extension'].map(section => { const selected=tasks.filter(task=>task.section===section), qs=selected.flatMap(t=>t.questions);return { section,taskCount:selected.length,completedTaskCount:selected.filter(t=>t.completionStatus==='complete').length,questionCount:qs.length,masteredQuestionCount:qs.filter(q=>q.masteryStatus==='mastered').length }; }),
     totals: {
       questionCount: all.length, masteredQuestionCount: all.filter(item => item.masteryStatus === 'mastered').length,
       taskCount: tasks.length, completedTaskCount: tasks.filter(item => item.completionStatus === 'complete').length,

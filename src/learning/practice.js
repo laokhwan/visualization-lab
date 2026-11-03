@@ -1,5 +1,6 @@
 import { questions } from '../content/questions.js';
-import { copyDataset } from '../content/datasets.js';
+import { copyDataset, datasets } from '../content/datasets.js';
+import { snapshotConfig } from '../data/config.js';
 import { evaluateAnswer, evaluateDesign } from './evaluate.js';
 import { experimentComplete } from './experiments.js';
 
@@ -63,10 +64,10 @@ export function completeTask(task, draft) {
   // Completion is historical: subsequent experiments cannot rewrite this evidence.
   if (!draft.completion) {
     draft.completion = {
-      config: { ...draft.config }, dataset: copyDataset(task.dataset), prediction: draft.prediction,
+      config: snapshotConfig(datasets[task.dataset],draft.config), dataset: copyDataset(task.dataset), prediction: draft.prediction,
       questionAttemptNumbers: Object.fromEntries(task.questionIds.map(id => [id, draft.questions[id].history.length])),
       reflections: [draft.note, ...(task.secondPrompt ? [draft.note2] : [])],
-      experiments: draft.experiments.map(snapshot => ({ ...snapshot, config: { ...snapshot.config }, dataset: { ...snapshot.dataset, rows: snapshot.dataset.rows.map(row => ({ ...row })) } })),
+      experiments: structuredClone(draft.experiments),
     };
   }
   return { accepted: true, criteria };

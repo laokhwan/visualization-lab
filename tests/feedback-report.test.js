@@ -9,7 +9,7 @@ import { buildLearningReport, reportWarning } from '../src/report/model.js';
 import { buildPdfDefinition, exportChartSvg } from '../src/report/pdf.js';
 import { prepareTask } from './helpers/learning.js';
 
-test('all ten questions have three levels and repeated answers receive new guidance', () => {
+test('all 34 questions have three levels and repeated answers receive new guidance', () => {
   for (const id of Object.keys(questions)) assert.equal(hints[id].length, 3);
   const progress = createQuestionProgress(), question = questions['compare-reason'];
   for (let i = 1; i <= 5; i++) {
@@ -40,7 +40,7 @@ test('report uses frozen completed evidence, excludes drafts and Free by default
   draft.note = 'UNSAVED_DRAFT'; draft.config.kind = 'line'; state.free.dataset.title = 'FREE_PRIVATE';
   state.guided.color.focus.note = 'OTHER_DRAFT';
   const report = buildLearningReport(state, { generatedAt: '2026-11-03T03:00:00Z' });
-  assert.equal(report.reportSchemaVersion, 1);
+  assert.equal(report.reportSchemaVersion, 2);
   assert.equal(report.evidence[0].finalChart.config.kind, 'bar');
   assert.equal(report.evidence[0].reflectionEvaluation, 'not-evaluated');
   const json = JSON.stringify(report);

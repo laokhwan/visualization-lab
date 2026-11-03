@@ -1,0 +1,685 @@
+{
+  "storageSchemaVersion": 1,
+  "contentVersion": "practice-1.2",
+  "assessmentManifest": {
+    "choose/compare": {
+      "assessmentVersion": 1,
+      "fingerprint": "7fcfeca3"
+    },
+    "choose/time": {
+      "assessmentVersion": 1,
+      "fingerprint": "8f89770e"
+    },
+    "color/focus": {
+      "assessmentVersion": 1,
+      "fingerprint": "2b1650e5"
+    },
+    "misleading/axis": {
+      "assessmentVersion": 1,
+      "fingerprint": "9e1a028d"
+    },
+    "redesign/revision": {
+      "assessmentVersion": 1,
+      "fingerprint": "cf891763"
+    }
+  },
+  "updatedAt": "2026-11-03T09:55:04.771Z",
+  "lastLocation": {
+    "labId": "choose",
+    "taskId": "compare"
+  },
+  "tasks": {
+    "choose/compare": {
+      "config": {
+        "kind": "bar",
+        "palette": "uniform",
+        "highlight": 2,
+        "labels": true,
+        "baseline": 0,
+        "upper": null
+      },
+      "prediction": "pie",
+      "predictionSaved": true,
+      "note": "สังเกตว่ารูปแบบการนำเสนอเปลี่ยนการรับรู้ แต่ค่าข้อมูลไม่เปลี่ยน จึงควรตรวจแกน หน่วย และวัตถุประสงค์ก่อนตีความ",
+      "note2": "ใช้สีอย่างมีความหมายและระบุหน่วยให้ชัดเจน เพื่อให้ผู้อ่านเปรียบเทียบข้อมูลได้อย่างเหมาะสม",
+      "experiments": [
+        {
+          "id": "compare:pie",
+          "slotId": "pie",
+          "label": "กราฟวงกลม",
+          "config": {
+            "kind": "pie",
+            "palette": "uniform",
+            "highlight": 2,
+            "labels": true,
+            "baseline": 0,
+            "upper": null
+          },
+          "dataset": {
+            "id": "groups",
+            "title": "ชั่วโมงอ่านหนังสือเฉลี่ยตามห้อง",
+            "xLabel": "ห้องเรียน",
+            "xType": "category",
+            "unit": "ชั่วโมง/สัปดาห์",
+            "partToWhole": false,
+            "rows": [
+              {
+                "label": "ห้อง A",
+                "value": 4.2
+              },
+              {
+                "label": "ห้อง B",
+                "value": 5.6
+              },
+              {
+                "label": "ห้อง C",
+                "value": 6.9
+              },
+              {
+                "label": "ห้อง D",
+                "value": 5.1
+              }
+            ]
+          }
+        },
+        {
+          "id": "compare:comparison",
+          "slotId": "comparison",
+          "label": "กราฟแท่งหรือกราฟจุด",
+          "config": {
+            "kind": "bar",
+            "palette": "uniform",
+            "highlight": 2,
+            "labels": true,
+            "baseline": 0,
+            "upper": null
+          },
+          "dataset": {
+            "id": "groups",
+            "title": "ชั่วโมงอ่านหนังสือเฉลี่ยตามห้อง",
+            "xLabel": "ห้องเรียน",
+            "xType": "category",
+            "unit": "ชั่วโมง/สัปดาห์",
+            "partToWhole": false,
+            "rows": [
+              {
+                "label": "ห้อง A",
+                "value": 4.2
+              },
+              {
+                "label": "ห้อง B",
+                "value": 5.6
+              },
+              {
+                "label": "ห้อง C",
+                "value": 6.9
+              },
+              {
+                "label": "ห้อง D",
+                "value": 5.1
+              }
+            ]
+          }
+        }
+      ],
+      "questions": {
+        "compare-reason": {
+          "selectedOptionIds": [
+            "b"
+          ],
+          "masteryStatus": "mastered",
+          "firstMasteredAttempt": 1,
+          "history": [
+            {
+              "attemptNumber": 1,
+              "selectedOptionIds": [
+                "b"
+              ],
+              "correct": true,
+              "experimentSnapshotIds": [
+                "compare:pie",
+                "compare:comparison"
+              ]
+            }
+          ],
+          "editing": false,
+          "requestedHintLevel": 0,
+          "validationMessage": ""
+        },
+        "compare-alternatives": {
+          "selectedOptionIds": [
+            "a",
+            "b"
+          ],
+          "masteryStatus": "mastered",
+          "firstMasteredAttempt": 1,
+          "history": [
+            {
+              "attemptNumber": 1,
+              "selectedOptionIds": [
+                "a",
+                "b"
+              ],
+              "correct": true,
+              "experimentSnapshotIds": [
+                "compare:pie",
+                "compare:comparison"
+              ]
+            }
+          ],
+          "editing": false,
+          "requestedHintLevel": 0,
+          "validationMessage": ""
+        }
+      },
+      "completion": {
+        "config": {
+          "kind": "bar",
+          "palette": "uniform",
+          "highlight": 2,
+          "labels": true,
+          "baseline": 0,
+          "upper": null
+        },
+        "dataset": {
+          "id": "groups",
+          "title": "ชั่วโมงอ่านหนังสือเฉลี่ยตามห้อง",
+          "xLabel": "ห้องเรียน",
+          "xType": "category",
+          "unit": "ชั่วโมง/สัปดาห์",
+          "partToWhole": false,
+          "rows": [
+            {
+              "label": "ห้อง A",
+              "value": 4.2
+            },
+            {
+              "label": "ห้อง B",
+              "value": 5.6
+            },
+            {
+              "label": "ห้อง C",
+              "value": 6.9
+            },
+            {
+              "label": "ห้อง D",
+              "value": 5.1
+            }
+          ]
+        },
+        "prediction": "pie",
+        "questionAttemptNumbers": {
+          "compare-reason": 1,
+          "compare-alternatives": 1
+        },
+        "reflections": [
+          "สังเกตว่ารูปแบบการนำเสนอเปลี่ยนการรับรู้ แต่ค่าข้อมูลไม่เปลี่ยน จึงควรตรวจแกน หน่วย และวัตถุประสงค์ก่อนตีความ"
+        ],
+        "experiments": [
+          {
+            "id": "compare:pie",
+            "slotId": "pie",
+            "label": "กราฟวงกลม",
+            "config": {
+              "kind": "pie",
+              "palette": "uniform",
+              "highlight": 2,
+              "labels": true,
+              "baseline": 0,
+              "upper": null
+            },
+            "dataset": {
+              "id": "groups",
+              "title": "ชั่วโมงอ่านหนังสือเฉลี่ยตามห้อง",
+              "xLabel": "ห้องเรียน",
+              "xType": "category",
+              "unit": "ชั่วโมง/สัปดาห์",
+              "partToWhole": false,
+              "rows": [
+                {
+                  "label": "ห้อง A",
+                  "value": 4.2
+                },
+                {
+                  "label": "ห้อง B",
+                  "value": 5.6
+                },
+                {
+                  "label": "ห้อง C",
+                  "value": 6.9
+                },
+                {
+                  "label": "ห้อง D",
+                  "value": 5.1
+                }
+              ]
+            }
+          },
+          {
+            "id": "compare:comparison",
+            "slotId": "comparison",
+            "label": "กราฟแท่งหรือกราฟจุด",
+            "config": {
+              "kind": "bar",
+              "palette": "uniform",
+              "highlight": 2,
+              "labels": true,
+              "baseline": 0,
+              "upper": null
+            },
+            "dataset": {
+              "id": "groups",
+              "title": "ชั่วโมงอ่านหนังสือเฉลี่ยตามห้อง",
+              "xLabel": "ห้องเรียน",
+              "xType": "category",
+              "unit": "ชั่วโมง/สัปดาห์",
+              "partToWhole": false,
+              "rows": [
+                {
+                  "label": "ห้อง A",
+                  "value": 4.2
+                },
+                {
+                  "label": "ห้อง B",
+                  "value": 5.6
+                },
+                {
+                  "label": "ห้อง C",
+                  "value": 6.9
+                },
+                {
+                  "label": "ห้อง D",
+                  "value": 5.1
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "completionFeedback": null
+    },
+    "choose/time": {
+      "config": {
+        "kind": "bar",
+        "palette": "uniform",
+        "highlight": 2,
+        "labels": true,
+        "baseline": 0,
+        "upper": null
+      },
+      "prediction": "",
+      "predictionSaved": false,
+      "note": "",
+      "note2": "",
+      "experiments": [],
+      "questions": {
+        "time-design": {
+          "selectedOptionIds": [],
+          "masteryStatus": "not-mastered",
+          "firstMasteredAttempt": null,
+          "history": [],
+          "editing": true,
+          "requestedHintLevel": 0,
+          "validationMessage": ""
+        },
+        "time-interpretation": {
+          "selectedOptionIds": [],
+          "masteryStatus": "not-mastered",
+          "firstMasteredAttempt": null,
+          "history": [],
+          "editing": true,
+          "requestedHintLevel": 0,
+          "validationMessage": ""
+        }
+      },
+      "completion": null,
+      "completionFeedback": null
+    },
+    "color/focus": {
+      "config": {
+        "kind": "bar",
+        "palette": "highlight",
+        "highlight": 2,
+        "labels": true,
+        "baseline": 0,
+        "upper": null
+      },
+      "prediction": "uniform",
+      "predictionSaved": true,
+      "note": "สังเกตว่ารูปแบบการนำเสนอเปลี่ยนการรับรู้ แต่ค่าข้อมูลไม่เปลี่ยน จึงควรตรวจแกน หน่วย และวัตถุประสงค์ก่อนตีความ",
+      "note2": "ใช้สีอย่างมีความหมายและระบุหน่วยให้ชัดเจน เพื่อให้ผู้อ่านเปรียบเทียบข้อมูลได้อย่างเหมาะสม",
+      "experiments": [
+        {
+          "id": "focus:categorical",
+          "slotId": "categorical",
+          "label": "สีแยกหมวดหมู่",
+          "config": {
+            "kind": "bar",
+            "palette": "categorical",
+            "highlight": 2,
+            "labels": true,
+            "baseline": 0,
+            "upper": null
+          },
+          "dataset": {
+            "id": "groups",
+            "title": "ชั่วโมงอ่านหนังสือเฉลี่ยตามห้อง",
+            "xLabel": "ห้องเรียน",
+            "xType": "category",
+            "unit": "ชั่วโมง/สัปดาห์",
+            "partToWhole": false,
+            "rows": [
+              {
+                "label": "ห้อง A",
+                "value": 4.2
+              },
+              {
+                "label": "ห้อง B",
+                "value": 5.6
+              },
+              {
+                "label": "ห้อง C",
+                "value": 6.9
+              },
+              {
+                "label": "ห้อง D",
+                "value": 5.1
+              }
+            ]
+          }
+        },
+        {
+          "id": "focus:highlight",
+          "slotId": "highlight",
+          "label": "สีเน้นห้อง C",
+          "config": {
+            "kind": "bar",
+            "palette": "highlight",
+            "highlight": 2,
+            "labels": true,
+            "baseline": 0,
+            "upper": null
+          },
+          "dataset": {
+            "id": "groups",
+            "title": "ชั่วโมงอ่านหนังสือเฉลี่ยตามห้อง",
+            "xLabel": "ห้องเรียน",
+            "xType": "category",
+            "unit": "ชั่วโมง/สัปดาห์",
+            "partToWhole": false,
+            "rows": [
+              {
+                "label": "ห้อง A",
+                "value": 4.2
+              },
+              {
+                "label": "ห้อง B",
+                "value": 5.6
+              },
+              {
+                "label": "ห้อง C",
+                "value": 6.9
+              },
+              {
+                "label": "ห้อง D",
+                "value": 5.1
+              }
+            ]
+          }
+        }
+      ],
+      "questions": {
+        "color-focus": {
+          "selectedOptionIds": [
+            "c"
+          ],
+          "masteryStatus": "mastered",
+          "firstMasteredAttempt": 1,
+          "history": [
+            {
+              "attemptNumber": 1,
+              "selectedOptionIds": [
+                "c"
+              ],
+              "correct": true,
+              "experimentSnapshotIds": [
+                "focus:categorical",
+                "focus:highlight"
+              ]
+            }
+          ],
+          "editing": false,
+          "requestedHintLevel": 0,
+          "validationMessage": ""
+        },
+        "color-meaning": {
+          "selectedOptionIds": [
+            "a",
+            "b",
+            "c"
+          ],
+          "masteryStatus": "mastered",
+          "firstMasteredAttempt": 1,
+          "history": [
+            {
+              "attemptNumber": 1,
+              "selectedOptionIds": [
+                "a",
+                "b",
+                "c"
+              ],
+              "correct": true,
+              "experimentSnapshotIds": [
+                "focus:categorical",
+                "focus:highlight"
+              ]
+            }
+          ],
+          "editing": false,
+          "requestedHintLevel": 0,
+          "validationMessage": ""
+        }
+      },
+      "completion": {
+        "config": {
+          "kind": "bar",
+          "palette": "highlight",
+          "highlight": 2,
+          "labels": true,
+          "baseline": 0,
+          "upper": null
+        },
+        "dataset": {
+          "id": "groups",
+          "title": "ชั่วโมงอ่านหนังสือเฉลี่ยตามห้อง",
+          "xLabel": "ห้องเรียน",
+          "xType": "category",
+          "unit": "ชั่วโมง/สัปดาห์",
+          "partToWhole": false,
+          "rows": [
+            {
+              "label": "ห้อง A",
+              "value": 4.2
+            },
+            {
+              "label": "ห้อง B",
+              "value": 5.6
+            },
+            {
+              "label": "ห้อง C",
+              "value": 6.9
+            },
+            {
+              "label": "ห้อง D",
+              "value": 5.1
+            }
+          ]
+        },
+        "prediction": "uniform",
+        "questionAttemptNumbers": {
+          "color-focus": 1,
+          "color-meaning": 1
+        },
+        "reflections": [
+          "สังเกตว่ารูปแบบการนำเสนอเปลี่ยนการรับรู้ แต่ค่าข้อมูลไม่เปลี่ยน จึงควรตรวจแกน หน่วย และวัตถุประสงค์ก่อนตีความ"
+        ],
+        "experiments": [
+          {
+            "id": "focus:categorical",
+            "slotId": "categorical",
+            "label": "สีแยกหมวดหมู่",
+            "config": {
+              "kind": "bar",
+              "palette": "categorical",
+              "highlight": 2,
+              "labels": true,
+              "baseline": 0,
+              "upper": null
+            },
+            "dataset": {
+              "id": "groups",
+              "title": "ชั่วโมงอ่านหนังสือเฉลี่ยตามห้อง",
+              "xLabel": "ห้องเรียน",
+              "xType": "category",
+              "unit": "ชั่วโมง/สัปดาห์",
+              "partToWhole": false,
+              "rows": [
+                {
+                  "label": "ห้อง A",
+                  "value": 4.2
+                },
+                {
+                  "label": "ห้อง B",
+                  "value": 5.6
+                },
+                {
+                  "label": "ห้อง C",
+                  "value": 6.9
+                },
+                {
+                  "label": "ห้อง D",
+                  "value": 5.1
+                }
+              ]
+            }
+          },
+          {
+            "id": "focus:highlight",
+            "slotId": "highlight",
+            "label": "สีเน้นห้อง C",
+            "config": {
+              "kind": "bar",
+              "palette": "highlight",
+              "highlight": 2,
+              "labels": true,
+              "baseline": 0,
+              "upper": null
+            },
+            "dataset": {
+              "id": "groups",
+              "title": "ชั่วโมงอ่านหนังสือเฉลี่ยตามห้อง",
+              "xLabel": "ห้องเรียน",
+              "xType": "category",
+              "unit": "ชั่วโมง/สัปดาห์",
+              "partToWhole": false,
+              "rows": [
+                {
+                  "label": "ห้อง A",
+                  "value": 4.2
+                },
+                {
+                  "label": "ห้อง B",
+                  "value": 5.6
+                },
+                {
+                  "label": "ห้อง C",
+                  "value": 6.9
+                },
+                {
+                  "label": "ห้อง D",
+                  "value": 5.1
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "completionFeedback": null
+    },
+    "misleading/axis": {
+      "config": {
+        "kind": "bar",
+        "palette": "uniform",
+        "highlight": 2,
+        "labels": true,
+        "baseline": 70,
+        "upper": null
+      },
+      "prediction": "",
+      "predictionSaved": false,
+      "note": "",
+      "note2": "",
+      "experiments": [],
+      "questions": {
+        "axis-perception": {
+          "selectedOptionIds": [],
+          "masteryStatus": "not-mastered",
+          "firstMasteredAttempt": null,
+          "history": [],
+          "editing": true,
+          "requestedHintLevel": 0,
+          "validationMessage": ""
+        },
+        "axis-principles": {
+          "selectedOptionIds": [],
+          "masteryStatus": "not-mastered",
+          "firstMasteredAttempt": null,
+          "history": [],
+          "editing": true,
+          "requestedHintLevel": 0,
+          "validationMessage": ""
+        }
+      },
+      "completion": null,
+      "completionFeedback": null
+    },
+    "redesign/revision": {
+      "config": {
+        "kind": "bar",
+        "palette": "categorical",
+        "highlight": 2,
+        "labels": true,
+        "baseline": 70,
+        "upper": null
+      },
+      "prediction": "",
+      "predictionSaved": false,
+      "note": "",
+      "note2": "",
+      "experiments": [],
+      "questions": {
+        "redesign-choice": {
+          "selectedOptionIds": [],
+          "masteryStatus": "not-mastered",
+          "firstMasteredAttempt": null,
+          "history": [],
+          "editing": true,
+          "requestedHintLevel": 0,
+          "validationMessage": ""
+        },
+        "redesign-principles": {
+          "selectedOptionIds": [],
+          "masteryStatus": "not-mastered",
+          "firstMasteredAttempt": null,
+          "history": [],
+          "editing": true,
+          "requestedHintLevel": 0,
+          "validationMessage": ""
+        }
+      },
+      "completion": null,
+      "completionFeedback": null
+    }
+  },
+  "revision": 1
+}

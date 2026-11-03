@@ -1,3 +1,4 @@
+import { researchDatasets } from './research-data.js';
 export const datasets = {
   groups: {
     id: 'groups', title: 'ชั่วโมงอ่านหนังสือเฉลี่ยตามห้อง', xLabel: 'ห้องเรียน', xType: 'category', unit: 'ชั่วโมง/สัปดาห์', partToWhole: false,
@@ -23,5 +24,6 @@ export const datasets = {
 
 export function copyDataset(id) {
   const data = datasets[id];
-  return { ...data, rows: data.rows.map(row => ({ ...row })) };
+  return structuredClone(data);
 }
+Object.assign(datasets, researchDatasets);
