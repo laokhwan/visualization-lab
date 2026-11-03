@@ -77,6 +77,13 @@ td:first-child input { min-width: 140px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
 .controls-fieldset, .reasoning-fields { border: 0; margin: 0; padding: 0; min-width: 0; }
 .controls-fieldset { grid-column: 1 / -1; }
+.storage-panel, .report-panel { padding: 18px; border: 1px solid var(--line); border-radius: 14px; background: white; margin: 18px 0; }
+.storage-panel h2 { font-size: 18px; }
+.storage-panel .help { margin-bottom: 8px; }
+.storage-panel #storage-status { font-weight: 600; color: var(--teal); }
+.button-link { display: inline-flex; align-items: center; min-height: 44px; border: 1px solid #aebccc; border-radius: 10px; padding: 10px 16px; text-decoration: none; font-weight: 600; }
+.report-panel .check { align-items: flex-start; padding: 10px 0; }
+.report-panel .check input { margin-top: 4px; }
 .experiment-panel { margin-top: 20px; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: #f9fbfd; }
 .experiment-panel h4, .question-card h4 { margin: 0 0 10px; }
 .experiment-checklist { padding-left: 22px; }

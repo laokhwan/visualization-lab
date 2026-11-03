@@ -1,0 +1,11 @@
+import { readFile, writeFile, mkdir, copyFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+const root = new URL('../', import.meta.url);
+const file = name => fileURLToPath(new URL(name, root));
+await mkdir(file('vendor/'), { recursive: true });
+await copyFile(file('node_modules/pdfmake/build/pdfmake.min.js'), file('vendor/pdfmake.min.js'));
+await copyFile(file('node_modules/pdfmake/LICENSE'), file('vendor/pdfmake-LICENSE.txt'));
+const fonts = {};
+for (const name of ['Sarabun-Regular.ttf', 'Sarabun-Bold.ttf']) fonts[name] = (await readFile(file(`assets/fonts/${name}`))).toString('base64');
+await writeFile(file('vendor/pdf-fonts.js'), `// Sarabun, SIL Open Font License: ../assets/fonts/OFL.txt\nexport const fonts = ${JSON.stringify(fonts)};\n`);
+console.log('Prepared local pdfmake browser bundle and Thai fonts.');

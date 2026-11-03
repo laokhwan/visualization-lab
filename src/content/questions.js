@@ -1,6 +1,6 @@
 // Answer keys are client-side learning aids, not secure examination data.
 const option = (id, text, retryFeedback, explanation) => ({ id, text, retryFeedback, explanation });
-export const contentVersion = 'practice-1.0';
+export const contentVersion = 'practice-1.2';
 export const questions = {
   'compare-reason': {
     id: 'compare-reason', version: 1, type: 'single', prompt: 'เหตุใดกราฟแท่งจึงเหมาะกับการเปรียบเทียบชั่วโมงอ่านหนังสือระหว่างห้อง', correctOptionIds: ['b'],

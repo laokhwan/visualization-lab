@@ -5,14 +5,16 @@ import { escapeHtml as esc } from './html.js';
 import { questionCounts } from '../learning/practice.js';
 import { experimentComplete } from '../learning/experiments.js';
 import { chartSvg, legendHtml } from '../charts/render.js';
+import { adaptiveFeedback } from '../learning/feedback.js';
 
 export function questionHtml(id, progress, index) {
   const question = questions[id];
   const counts = questionCounts(progress);
   const latest = progress.history.at(-1);
+  const hint = adaptiveFeedback(question, progress);
   const feedback = latest ? latest.correct
     ? `<p class="success">✓ คำตอบนี้ผ่านเกณฑ์แล้ว</p><details><summary>เหตุผลของแต่ละตัวเลือก</summary><ul class="criteria">${question.options.map(option => `<li><strong>${question.correctOptionIds.includes(option.id) ? '✓ สอดคล้องกับโจทย์' : 'ข้อควรพิจารณา'}: ${esc(option.text)}</strong><p>${esc(option.explanation)}</p></li>`).join('')}</ul></details>`
-    : `<p>ยังไม่ตรงกับคำถาม ลองทบทวนกราฟและคำแนะนำ</p><ul>${latest.selectedOptionIds.map(optionId => `<li>${esc(question.options.find(option => option.id === optionId).retryFeedback)}</li>`).join('')}</ul>`
+    : `<p>ยังไม่ตรงกับคำถาม ลองทบทวนกราฟและคำแนะนำ</p><p class="help">คำใบ้ระดับ ${hint.level} / 3 · ไม่หักผลที่เคยผ่าน</p><ul>${hint.messages.map(message => `<li>${esc(message)}</li>`).join('')}</ul>${hint.level < 3 ? `<button type="button" class="text-button" data-more-hint="${id}">ดูคำใบ้เพิ่มเติม</button>` : '<p class="help">กลับไปทดลองกราฟตามขั้นข้างต้น แล้วลองใหม่ได้ไม่จำกัด</p>'}`
     : '<p class="help">ยังไม่ได้ส่งคำตอบ</p>';
   return `<h4 id="${id}-title">คำถามที่ ${index + 1} · ${question.type === 'single' ? 'เลือกคำตอบเดียว' : 'เลือกได้หลายคำตอบ'}</h4>
     <p class="question-mastery">${progress.masteryStatus === 'mastered' ? '✓ เคยตอบถูกแล้ว (Mastered)' : 'ยังไม่ผ่านข้อประเมิน'} · ส่งแล้ว ${counts.attemptCount} ครั้ง · ตอบผิด ${counts.incorrectAttemptCount} ครั้ง</p>

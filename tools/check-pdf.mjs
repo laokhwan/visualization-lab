@@ -1,0 +1,23 @@
+import { createRequire } from 'node:module';
+import { mkdir } from 'node:fs/promises';
+import { createWriteStream } from 'node:fs';
+import { resolve } from 'node:path';
+import { createState } from '../src/state.js';
+import { labs } from '../src/content/labs.js';
+import { prepareTask } from '../tests/helpers/learning.js';
+import { buildLearningReport } from '../src/report/model.js';
+import { buildPdfDefinition } from '../src/report/pdf.js';
+const require = createRequire(import.meta.url);
+const PdfPrinter = require('pdfmake');
+const state = createState();
+for (const lab of labs) for (const task of lab.tasks) prepareTask(state, lab.id, task.id, { longText: true });
+const printer = new PdfPrinter({ Sarabun: { normal: resolve('assets/fonts/Sarabun-Regular.ttf'), bold: resolve('assets/fonts/Sarabun-Bold.ttf'), italics: resolve('assets/fonts/Sarabun-Regular.ttf'), bolditalics: resolve('assets/fonts/Sarabun-Bold.ttf') } });
+await mkdir('artifacts', { recursive: true });
+const report = buildLearningReport(state);
+const doc = printer.createPdfKitDocument(buildPdfDefinition(report));
+await new Promise((resolve, reject) => {
+  const output = createWriteStream('artifacts/sample-report.pdf');
+  doc.on('error', reject); output.on('error', reject); output.on('finish', resolve);
+  doc.pipe(output); doc.end();
+});
+console.log('PDF fixture created: artifacts/sample-report.pdf');

@@ -4,7 +4,7 @@ import { evaluateAnswer, evaluateDesign } from './evaluate.js';
 import { experimentComplete } from './experiments.js';
 
 export function createQuestionProgress() {
-  return { selectedOptionIds: [], masteryStatus: 'not-mastered', firstMasteredAttempt: null, history: [], editing: true, validationMessage: '' };
+  return { selectedOptionIds: [], masteryStatus: 'not-mastered', firstMasteredAttempt: null, history: [], editing: true, requestedHintLevel: 0, validationMessage: '' };
 }
 
 export function questionCounts(progress) {
@@ -30,6 +30,7 @@ export function submitAnswer(task, draft, questionId) {
   progress.history.push({ attemptNumber, selectedOptionIds: [...progress.selectedOptionIds], correct: result.correct, experimentSnapshotIds: draft.experiments.map(snapshot => snapshot.id) });
   progress.validationMessage = '';
   progress.editing = false;
+  if (result.correct) progress.requestedHintLevel = 0;
   if (result.correct && progress.masteryStatus !== 'mastered') {
     progress.masteryStatus = 'mastered';
     progress.firstMasteredAttempt = attemptNumber;
@@ -63,6 +64,7 @@ export function completeTask(task, draft) {
   if (!draft.completion) {
     draft.completion = {
       config: { ...draft.config }, dataset: copyDataset(task.dataset), prediction: draft.prediction,
+      questionAttemptNumbers: Object.fromEntries(task.questionIds.map(id => [id, draft.questions[id].history.length])),
       reflections: [draft.note, ...(task.secondPrompt ? [draft.note2] : [])],
       experiments: draft.experiments.map(snapshot => ({ ...snapshot, config: { ...snapshot.config }, dataset: { ...snapshot.dataset, rows: snapshot.dataset.rows.map(row => ({ ...row })) } })),
     };

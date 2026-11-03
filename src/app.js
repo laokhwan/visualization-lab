@@ -12,9 +12,20 @@ import { questionHtml, experimentsHtml, reflectionStatus, completionFeedbackHtml
 import { summaryHtml } from './ui/summary.js';
 import { syncCapabilities, editorRow } from './ui/controls.js';
 import { escapeHtml as esc, options } from './ui/html.js';
+import { createPersistence } from './storage/controller.js';
+import { storageHtml } from './ui/storage.js';
+import { requestHint } from './learning/feedback.js';
+import { buildLearningReport } from './report/model.js';
+import { reportHtml } from './ui/report.js';
+import { createReportController } from './report/controller.js';
 
 const state = createState();
 const $ = id => document.getElementById(id);
+let ready = false;
+const persistence = createPersistence({ state, basePath: new URL('../', import.meta.url).pathname, onChange: info => {
+  $('storage-panel').innerHTML = storageHtml({ ...info, canRecover: persistence.getInfo().canRecover });
+} });
+const reportController = createReportController({ state, stage: $('stage'), flush: () => persistence.flush() });
 
 function active() {
   const { task, draft } = current(state);
@@ -24,6 +35,7 @@ function active() {
 function renderNavigation() {
   $('navigation').innerHTML = navigationHtml(state);
   $('guided-progress').hidden = state.mode === 'free';
+  $('storage-panel').hidden = state.mode === 'free';
   if (state.mode === 'guided') {
     const { totals } = buildLearningSummary(state);
     $('progress-text').textContent = `ข้อที่เคยตอบถูก ${totals.masteredQuestionCount} / ${totals.questionCount}`;
@@ -56,8 +68,9 @@ function updateChart() {
 }
 
 function renderStage(focus = false) {
+  reportController.dispose();
   renderNavigation();
-  if (state.mode === 'guided' && state.view === 'summary') $('stage').innerHTML = summaryHtml(buildLearningSummary(state));
+  if (state.mode === 'guided' && state.view === 'summary') $('stage').innerHTML = summaryHtml(buildLearningSummary(state)) + reportHtml(buildLearningReport(state));
   else {
     $('stage').innerHTML = stageHtml(state);
     updateChart();
@@ -70,6 +83,8 @@ function renderStage(focus = false) {
 }
 
 function changeMode(mode, focus = true) {
+  if (!ready) return;
+  if (state.mode === 'guided') persistence.flush();
   state.mode = mode;
   state.view = 'activity';
   renderStage(focus);
@@ -138,11 +153,21 @@ $('show-summary').addEventListener('click', () => {
   state.view = 'summary';
   renderStage(true);
 });
-$('reset-guided').addEventListener('click', () => {
+$('reset-guided').addEventListener('click', async () => {
   if (!window.confirm('เริ่มการฝึกใหม่ทั้งหมดหรือไม่ คำคาดการณ์ หลักฐาน คำตอบ จำนวนครั้ง และ Mastery ในกิจกรรมตามขั้นตอนจะถูกล้าง โดยไม่เปลี่ยนการทดลองอิสระ')) return;
   resetGuided(state);
+  await persistence.reset();
   renderStage(true);
 });
+$('storage-panel').addEventListener('click', async event => {
+  const id = event.target.closest('button')?.id;
+  if (id === 'enable-storage') await persistence.enable();
+  else if (id === 'disable-storage' && window.confirm('ลบความคืบหน้าที่บันทึกบนเครื่องนี้หรือไม่ ข้อมูลปัจจุบันยังใช้ต่อในหน้านี้ได้ แต่ไฟล์ PDF ที่เคยบันทึกจะไม่ถูกลบ')) await persistence.disable();
+  else if (id === 'retry-storage') await persistence.flush();
+  else if (id === 'reload-progress') window.location.reload();
+  else if (id === 'accept-recovery' && window.confirm('เริ่มเฉพาะสถานการณ์ที่อ่านไม่ได้หรือเกณฑ์เปลี่ยนหรือไม่ ส่วนที่กู้คืนได้จะยังอยู่ และข้อมูลเดิมของส่วนที่เริ่มใหม่จะถูกลบ')) { await persistence.acceptRecovery(); renderStage(); }
+});
+window.addEventListener('storage', event => { if (event.key === persistence.getInfo().preferenceKey) persistence.pauseForOtherTab(); });
 $('navigation').addEventListener('click', event => {
   const lab = event.target.closest('[data-lab]');
   const dataset = event.target.closest('[data-dataset]');
@@ -225,6 +250,13 @@ $('stage').addEventListener('click', event => {
       $('reasoning-fields').disabled = !unlocked;
       if (unlocked) $('practice-announcement').textContent = 'บันทึกกราฟครบแล้ว เปิดคำถามและช่องสะท้อนคิดแล้ว';
     }
+  } else if (target.hasAttribute('data-more-hint')) {
+    const { task, draft } = current(state);
+    const id = target.dataset.moreHint;
+    requestHint(draft.questions[id]);
+    $(`question-${id}`).innerHTML = questionHtml(id, draft.questions[id], task.questionIds.indexOf(id));
+    $(`${id}-feedback`).focus({ preventScroll: true });
+    $('practice-announcement').textContent = 'แสดงคำใบ้เพิ่มเติมแล้ว จำนวนครั้งตอบและ Mastery ไม่เปลี่ยน';
   } else if (target.hasAttribute('data-retry')) {
     const { task, draft } = current(state);
     const id = target.dataset.retry;
@@ -339,4 +371,20 @@ $('stage').addEventListener('submit', event => {
   relabelRows();
 });
 
+// Storage observes state-changing actions; chart inspection and Free are excluded.
+document.addEventListener('input', event => {
+  if (ready && state.mode === 'guided' && ['prediction', 'reflection', 'reflection-2'].includes(event.target.id)) persistence.save({ draft: true });
+});
+document.addEventListener('change', event => {
+  if (ready && state.mode === 'guided' && (event.target.matches('[data-config], #prediction') || event.target.closest('[data-question-form]'))) persistence.save();
+});
+document.addEventListener('click', event => {
+  if (ready && state.mode === 'guided' && event.target.closest('[data-task], [data-lab], #save-prediction, #record-experiment, [data-retry], [data-more-hint], #complete-task, #reset-chart, #fit-axis, #previous, #next')) persistence.save();
+});
+document.addEventListener('submit', event => { if (ready && state.mode === 'guided' && event.target.matches('[data-question-form]')) persistence.save(); });
+document.addEventListener('focusout', event => { if (ready && state.mode === 'guided' && event.target.matches('textarea')) persistence.flush(); });
+document.addEventListener('visibilitychange', () => { if (ready && document.visibilityState === 'hidden') persistence.flush(); });
+await persistence.initialize();
+ready = true;
+$('workspace').removeAttribute('aria-busy');
 renderStage();

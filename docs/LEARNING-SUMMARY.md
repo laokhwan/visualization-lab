@@ -37,17 +37,17 @@ state → buildLearningSummary → summaryHtml
 
 รหัส snapshot ในประวัติเป็นรหัสภายในสถานการณ์ ไม่มีรหัสติดตามผู้ใช้ หลักฐานแต่ละรูปแบบบันทึกเพียงครั้งเดียว การคืนค่ากราฟไม่ลบหลักฐาน การเริ่มการฝึกใหม่ทั้งหมดล้าง Guided หลังยืนยัน โดยไม่เปลี่ยน Free Exploration
 
-## ขอบเขต PDF และ Google Classroom ในอนาคต
+## LearningReportV1 และขอบเขต Google Classroom
 
-ตัวส่งออก PDF จะรับ `LearningSummaryV1` และข้อมูลแสดงผลจากคลังเนื้อหา ไม่อ่านข้อความจาก DOM หากต้องการแนบสะท้อนคิดหรือระบุตัวตน ต้องอนุมัติสัญญาข้อมูลและนโยบายเพิ่มเติมก่อน ไม่เพิ่มข้อมูลเหล่านี้ลงรายงาน V1 โดยอัตโนมัติ
+Phase 1.2 เพิ่ม `LearningReportV1` เป็นแบบจำลองแยกจาก summary เดิม โดยมี `reportSchemaVersion`, `generatedAt`, `contentVersion`, `integrity`, `summary`, `includeDrafts` และ `evidence` รายสถานการณ์ หลักฐานมี lab/task IDs, source (`completed`/`in-progress`), experiments, finalChart, prediction และ reflections พร้อม `reflectionEvaluation: 'not-evaluated'` การสร้างใช้ deep copy จาก state ไม่อ่านข้อความย้อนจาก DOM และไม่เพิ่มสะท้อนคิดลง `LearningSummaryV1` เดิม
 
 Classroom adapter ในอนาคตใช้ขอบเขต `prepare(summary, externalAssignmentContext)` เพื่อแปลงรายงานตามการจับคู่งานที่ระบบภายนอกจัดหา การยืนยันตัวตน การถือ token และการส่งเครือข่ายอยู่ภายนอกตัวประเมินและ state ของแล็บ ต้องกำหนดสิทธิ์และการยืนยันผลที่น่าเชื่อถือแยกต่างหาก
 
-Phase 1 **ไม่สร้าง transport หรือ OAuth stub ที่เก็บ credentials** ไม่เพิ่ม Google SDK ไม่แสดงปุ่มส่ง Classroom และไม่เรียก API ใด ๆ การออกแบบนี้ไม่ได้ยืนยันว่ามี API สำหรับนำเข้ากิจกรรมเป็น Google Practice Sets
+Phase 1.2 สร้าง PDF ในเครื่องและให้ผู้เรียนแนบไฟล์ใน Classroom ด้วยตนเอง **ไม่สร้าง transport หรือ OAuth stub ที่เก็บ credentials** ไม่เพิ่ม Google SDK ไม่แสดงปุ่มส่ง Classroom และไม่เรียก API ใด ๆ การออกแบบนี้ไม่ได้ยืนยันว่ามี API สำหรับนำเข้ากิจกรรมเป็น Google Practice Sets
 
 ## ความน่าเชื่อถือและความเข้ากันได้
 
 - ข้อมูลและเฉลยอยู่ในเบราว์เซอร์ ผู้ใช้สามารถแก้ไขได้ `integrity` จึงเป็น `browser-unverified` เสมอ ห้ามใช้ DTO นี้เป็นหลักฐานคะแนนที่ยืนยันตัวตนแล้ว
-- ข้อมูลอยู่ในหน่วยความจำและหายเมื่อโหลดใหม่ ไม่มี migration ของข้อมูลถาวร
+- ค่าเริ่มต้นอยู่ในหน่วยความจำ เมื่อเลือกเปิดบันทึกจะกู้คืนได้จาก IndexedDB ตาม schema/content validation ดู `PERSISTENCE-AND-PDF.md`
 - รักษารหัสเนื้อหาให้คงที่ เปลี่ยน `contentVersion` เมื่อเปลี่ยนเนื้อหา หากเปลี่ยนสัญญารายงานที่เข้ากันไม่ได้ให้เพิ่ม `schemaVersion`
-- การส่ง Classroom การแปลงเป็นคะแนน persistence และ PDF ต้องอนุมัติเป็นงานแยก
+- การส่ง Classroom อัตโนมัติ การแปลงเป็นคะแนน และการระบุตัวผู้เรียนยังไม่อยู่ในขอบเขต

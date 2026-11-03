@@ -17,13 +17,14 @@
       <div><p class="eyebrow">ห้องปฏิบัติการข้อมูล</p><h1 id="page-title">การแสดงข้อมูล<br><em>เพื่อการวิจัย</em></h1><p>ฝึกเลือกและปรับกราฟให้เหมาะสมกับข้อมูลและวัตถุประสงค์</p><div class="button-row"><button id="start-guided" class="primary">เริ่มกิจกรรมตามขั้นตอน</button><button id="start-free" class="secondary">เปิดการทดลองอิสระ</button></div></div>
       <div class="hero-art" aria-hidden="true"><div class="sample-chart"><span style="height:42%"></span><span style="height:65%"></span><span style="height:87%"></span><span style="height:58%"></span></div><p>เลือกให้เหมาะสม · สื่อสารอย่างถูกต้อง</p></div>
     </section>
-    <section id="workspace" class="workspace" tabindex="-1" aria-label="พื้นที่เรียนรู้">
+    <section id="workspace" class="workspace" tabindex="-1" aria-label="พื้นที่เรียนรู้" aria-busy="true">
       <div class="switcher" role="group" aria-label="รูปแบบการเรียนรู้"><button data-mode="guided" aria-pressed="true">กิจกรรมตามขั้นตอน <small>(Guided Challenge)</small></button><button data-mode="free" aria-pressed="false">ทดลองอิสระ <small>(Free Exploration)</small></button></div>
-      <div class="workgrid"><aside class="sidebar" aria-label="เลือกกิจกรรม"><div id="navigation"></div><div id="guided-progress" class="aside-foot"><p id="progress-text"></p><progress id="progress" value="0" max="10" aria-label="จำนวนข้อที่เคยตอบถูก"></progress><p id="completion-text"></p><button id="show-summary" class="secondary">สรุปการเรียนรู้</button><button id="reset-guided" class="text-button">เริ่มการฝึกใหม่ทั้งหมด</button><p class="help">ความคืบหน้าอยู่ในหน้านี้เท่านั้น และหายเมื่อโหลดใหม่</p></div></aside>
+      <section id="storage-panel" class="storage-panel" aria-label="การบันทึกความคืบหน้า"></section>
+      <div class="workgrid"><aside class="sidebar" aria-label="เลือกกิจกรรม"><div id="navigation"></div><div id="guided-progress" class="aside-foot"><p id="progress-text"></p><progress id="progress" value="0" max="10" aria-label="จำนวนข้อที่เคยตอบถูก"></progress><p id="completion-text"></p><button id="show-summary" class="secondary">สรุปการเรียนรู้</button><button id="reset-guided" class="text-button">เริ่มการฝึกใหม่ทั้งหมด</button><p class="help">เมื่อเปิดบันทึกและบันทึกสำเร็จ ความคืบหน้าจะกลับมาได้บนเครื่องนี้</p></div></aside>
         <section id="stage" class="stage" aria-labelledby="stage-title"></section>
       </div>
     </section>
-    <footer><p>ข้อมูลทั้งหมดเป็นข้อมูลจำลองเพื่อการศึกษา · ไม่มีบัญชีผู้ใช้หรือระบบส่งคำตอบ</p><details><summary>ความเป็นส่วนตัว</summary><p>แอปไม่ใช้คุกกี้ ระบบวิเคราะห์การใช้งาน หรือการบันทึกคำตอบถาวร ข้อมูลอยู่ในหน่วยความจำของหน้านี้ ผู้ให้บริการ GitHub Pages อาจบันทึก IP เพื่อความปลอดภัยตามนโยบายของบริการ</p></details></footer>
+    <footer><p>ข้อมูลทั้งหมดเป็นข้อมูลจำลองเพื่อการศึกษา · ไม่มีบัญชีผู้ใช้หรือระบบส่งคำตอบ</p><details><summary>ความเป็นส่วนตัว</summary><p>แอปไม่มี analytics หรือระบบส่งข้อมูล เมื่อเลือกเปิดบันทึก ความคืบหน้าและสะท้อนคิดจะอยู่ใน IndexedDB บนเครื่องนี้ และ localStorage เก็บเพียงตัวเลือกเปิดบันทึก เครื่องที่ใช้ร่วมกันอาจเห็นข้อมูลเดิมได้ เบราว์เซอร์อาจลบข้อมูลหรือปฏิเสธการบันทึก ผลแก้ไขได้และไม่ใช่ผลการเรียนที่ยืนยันแล้ว ไฟล์ PDF ที่ดาวน์โหลดไม่ถูกลบเมื่อล้างข้อมูลในแอป ผู้ให้บริการ GitHub Pages อาจบันทึก IP ตามนโยบายของบริการ</p></details></footer>
   </main>
   <noscript><p class="notice">กรุณาเปิด JavaScript เพื่อใช้งานกิจกรรมและกราฟโต้ตอบ</p></noscript>
 </body>
