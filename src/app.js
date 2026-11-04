@@ -39,18 +39,18 @@ const persistence = createPersistence({
       canRecover: persistence.getInfo().canRecover
     });
     const captions = {
-      off: 'อยู่ในหน้านี้',
-      pending: 'รอบันทึก',
-      saving: 'กำลังบันทึก',
-      saved: 'บันทึกแล้ว',
-      restored: 'กู้คืนแล้ว',
-      loading: 'กำลังกู้คืน',
-      error: 'บันทึกมีปัญหา',
-      recovery: 'ตรวจข้อมูลเดิม',
-      ready: 'เปิดบันทึกแล้ว'
+      off: 'ยังไม่บันทึกความคืบหน้า',
+      pending: 'รอบันทึกความคืบหน้า',
+      saving: 'กำลังบันทึกความคืบหน้า',
+      saved: 'บันทึกความคืบหน้าแล้ว',
+      restored: 'กู้คืนความคืบหน้าแล้ว',
+      loading: 'กำลังกู้คืนความคืบหน้า',
+      error: 'บันทึกความคืบหน้าไม่สำเร็จ',
+      recovery: 'ตรวจความคืบหน้าเดิม',
+      ready: 'เปิดบันทึกความคืบหน้าแล้ว'
     };
     $('save-indicator').textContent = captions[info.status] || info.message;
-    $('storage-toggle').setAttribute('aria-label', `ความคืบหน้า: ${info.message}`);
+    $('storage-toggle').setAttribute('aria-label', `${$('save-indicator').textContent} · ${info.message}`);
     if (info.status === 'error' || info.blocked) setStorageOpen(true);
   }
 });
