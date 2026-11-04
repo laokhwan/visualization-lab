@@ -4,7 +4,7 @@ const labels = {
   distribution: 'การกระจายและช่วงชั้น',
   color: 'สี',
   axes: 'แกนและการนำเสนอ',
-  labels: 'ป้ายกำกับ'
+  labels: 'แสดงค่าบนกราฟ'
 };
 function groupFor(key) {
   if (/^histogram|^grouped|^encoding.group/.test(key)) return 'distribution';

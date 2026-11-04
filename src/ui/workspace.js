@@ -50,15 +50,15 @@ function prediction(task, draft) {
   return `<h3 id="step-title" tabindex="-1">คาดการณ์ก่อนทดลอง</h3><div class="field"><label for="prediction">${esc(task.predict)}</label>${field}</div><p class="help">คำคาดการณ์ไม่ถูกให้คะแนน และไม่ลด Mastery</p><p id="prediction-message" role="status"></p><div class="panel-actions">${draft.predictionSaved ? '<p class="success">บันทึกคำคาดการณ์แล้ว</p><button class="primary" data-step="experiment">ไปทดลอง</button>' : '<button id="save-prediction" class="primary">บันทึกและเริ่มทดลอง</button>'}</div>`;
 }
 export function experimentChecklist(task, draft) {
-  return `<details class="experiment-proof"><summary>คู่เปรียบเทียบและหลักฐาน</summary><ul class="experiment-checklist">${task.experiment.map((slot, i) => {
+  return `<section class="experiment-proof" aria-labelledby="experiment-proof-title"><h4 id="experiment-proof-title">กราฟที่ต้องบันทึก <span>(${draft.experiments.length}/2)</span></h4><ul class="experiment-checklist">${task.experiment.map((slot, i) => {
     const saved = draft.experiments.some(s => s.slotId === slot.id);
-    return `<li>${saved ? `✓ <button class="text-button" data-source="${slot.id}">แบบ ${'AB'[i]}: ${esc(slot.label)}</button>` : `○ ${esc(slot.label)}`}</li>`;
-  }).join('')}</ul></details>`;
+    return `<li>${saved ? `✓ <button class="text-button" data-source="${slot.id}">${i + 1}. ${esc(slot.label)} — บันทึกแล้ว · ดูกราฟ</button>` : `○ ${i + 1}. ${esc(slot.label)} — ยังไม่บันทึก`}</li>`;
+  }).join('')}</ul></section>`;
 }
 function experiment(task, draft, ui) {
   const ready = comparisonsReady(task, draft),
     editable = ui.source === 'current';
-  return `<h3 id="step-title" tabindex="-1">ทดลองและเปรียบเทียบ</h3><div id="controls"><fieldset id="experiment-controls" class="controls-fieldset"${editable ? '' : ' disabled'}><legend class="sr-only">ตัวควบคุมกราฟ</legend><div id="control-fields"></div></fieldset></div><p class="experiment-next">${ready ? '✓ บันทึกครบ 2 รูปแบบ' : `บันทึกแล้ว ${draft.experiments.length}/2 · ต่อไป: ${esc(task.experiment.find(slot => !draft.experiments.some(s => s.slotId === slot.id)).label)}`}</p><div class="panel-actions">${!editable ? '<button class="primary" data-source="current">กลับไปปรับกราฟ</button>' : ready ? '<button class="primary" data-step="explain">ไปอธิบายผล</button>' : '<button id="record-experiment" class="primary">บันทึกแบบเปรียบเทียบ</button>'}</div><p id="experiment-message" role="status"></p><div id="experiments-list">${experimentChecklist(task, draft)}</div>`;
+  return `<h3 id="step-title" tabindex="-1">ทดลองและเปรียบเทียบ</h3><div id="controls"><fieldset id="experiment-controls" class="controls-fieldset"${editable ? '' : ' disabled'}><legend class="sr-only">ตัวควบคุมกราฟ</legend><div id="control-fields"></div></fieldset></div><div id="experiments-list">${experimentChecklist(task, draft)}</div><div class="panel-actions">${!editable ? '<button class="primary" data-source="current">กลับไปปรับกราฟ</button>' : ready ? '<button class="primary" data-step="explain">ไปอธิบายผล</button>' : '<button id="record-experiment" class="primary">บันทึกแบบเปรียบเทียบ</button>'}</div><p id="experiment-message" role="status"></p>`;
 }
 export function explanationPanel(task, draft, ui) {
   const i = ui.questionIndex,

@@ -60,12 +60,12 @@ body[data-screen='workspace'] .shell { max-width:1440px;padding:12px max(16px,en
 .control-group > .help { font-size:13px;margin:4px 0; }
 .panel-actions { display:flex;flex-direction:column;gap:8px;margin-top:8px; }
 .context-panel p:empty { margin:0; }
-.context-panel .experiment-next { margin:4px 0;font-size:14px; }
-.context-panel .experiment-proof { margin-top:8px;padding-top:4px; }
-.context-panel .experiment-proof > summary { font-size:14px;min-height:44px; }
+.context-panel .experiment-proof { margin-top:4px;padding-top:4px;border-top:1px solid var(--line); }
+.experiment-proof h4 { font-size:14px;margin:0; }
+.experiment-proof h4 span { font-weight:400; }
 .panel-actions button { width:100%; }
-.experiment-checklist { padding:0;list-style:none;font-size:14px;margin:8px 0; }
-.experiment-checklist li { padding:4px 0;margin:0; }
+.experiment-checklist { padding:0;list-style:none;font-size:14px;margin:4px 0; }
+.experiment-checklist li { padding:2px 0;margin:0; }
 .experiment-checklist button { padding:4px;text-align:left;font-size:14px; }
 .question-nav { display:flex;gap:6px;margin-bottom:10px; }
 .question-nav button { flex:1;padding:8px 4px;font-size:14px; }
@@ -111,10 +111,18 @@ body[data-screen='workspace'] footer details { margin-top:0; }
   .learning-board[data-phase='experiment'] .context-panel > h3,
   .learning-board[data-phase='free'] .context-panel > h3 { position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap; }
   #control-fields > #control-errors { grid-column:1/-1; }
-  .context-panel .experiment-checklist { display:flex;gap:14px;flex-wrap:wrap; }
+  .context-panel .experiment-proof { display:grid;grid-template-columns:140px minmax(0,1fr);gap:8px;align-items:center; }
+  .context-panel .experiment-checklist { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px; }
+  .learning-board[data-phase='experiment'] .experiment-proof { margin-top:0;padding-top:0; }
+  .learning-board[data-phase='experiment'] .experiment-checklist { margin:0; }
+  .learning-board[data-phase='experiment'] .panel-actions { margin-top:0; }
+  .learning-board[data-phase='experiment'] .quick-controls .field { margin-bottom:6px; }
+  .learning-board[data-phase='experiment'] .context-panel { padding-top:8px; }
   .answer-option { min-height:48px; }
 }
 @media (max-width:650px) {
+  .context-panel .experiment-proof { display:block; }
+  .context-panel .experiment-checklist { grid-template-columns:1fr; }
   .top { align-items:flex-start; }
   #app-actions { width:100%;gap:4px; }
   #app-actions button { font-size:14px; }
