@@ -29,6 +29,7 @@ export function buildLearningSummary(state) {
         designStatus: evaluateDesign(task, draft.config).passed ? 'met' : 'not-met',
         reflectionProvided: Boolean(draft.note.trim()) && (!task.secondPrompt || Boolean(draft.note2.trim())),
         reflectionEvaluation: 'not-evaluated',
+        started: draft.predictionSaved || draft.experiments.length > 0 || taskQuestions.some(q => q.attemptCount > 0) || Boolean(draft.note.trim()) || Boolean(draft.note2.trim()),
         attemptCount: taskQuestions.reduce((sum, item) => sum + item.attemptCount, 0),
         incorrectAttemptCount: taskQuestions.reduce((sum, item) => sum + item.incorrectAttemptCount, 0),
         questions: taskQuestions,

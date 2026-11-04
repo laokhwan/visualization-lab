@@ -58,7 +58,12 @@ export const labs = [
   },
 ];
 
-for (const lab of labs) lab.tasks.push(...extraTasks[lab.id]);
+for (const lab of labs) {
+  lab.tasks.push(...extraTasks[lab.id]);
+  for (const task of lab.tasks) {
+    if (lab.id === 'choose' || !task.section) task.section = 'foundation';
+  }
+}
 
 export const predictions = {
   color: [['', 'เลือกคำตอบก่อนทดลอง'], ['uniform', 'ใช้สีเดียวทุกห้อง'], ['highlight', 'ใช้สีเด่นเฉพาะห้อง C'], ['categorical', 'ใช้สีต่างกันทุกห้อง']],

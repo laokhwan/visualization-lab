@@ -35,7 +35,7 @@ export function assessmentManifest() {
     assessmentVersion: taskAssessmentVersions[taskKey(lab, task)] ?? 1,
     fingerprint: fingerprint({
       engine: assessmentEngineVersion,
-      ...(task.section === 'extension' ? {
+      ...(isResearch(datasets[task.dataset]) ? {
         calculationVersion
       } : {}),
       dataset: datasets[task.dataset],
@@ -230,8 +230,8 @@ export function restoreProgress(payload) {
     issues = [];
   for (const lab of labs) for (const task of lab.tasks) {
     const key = taskKey(lab, task);
-    // Explicit additive migration: V1 contains only the five foundation tasks.
-    if (payload.storageSchemaVersion === 1 && task.section === 'extension' && !Object.hasOwn(payload.tasks, key) && !Object.hasOwn(payload.assessmentManifest, key)) continue;
+    // V1 predates research datasets; curriculum labels may change independently.
+    if (payload.storageSchemaVersion === 1 && isResearch(datasets[task.dataset]) && !Object.hasOwn(payload.tasks, key) && !Object.hasOwn(payload.assessmentManifest, key)) continue;
     if (JSON.stringify(payload.assessmentManifest[key]) !== JSON.stringify(manifest[key])) {
       issues.push({
         key,

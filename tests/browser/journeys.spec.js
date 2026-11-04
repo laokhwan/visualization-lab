@@ -102,9 +102,8 @@ test('all four labs, ten foundation questions and five tasks complete and review
   await page.locator('#show-summary').click();
   await expect(page.locator('.summary-metrics')).toContainText('10 / 34');
   await expect(page.locator('.summary-lab')).toHaveCount(4);
-  await page.locator('.summary-lab').first().locator('summary').first().click();
-  await page.locator('.summary-lab').first().locator('details details > summary').first().click();
-  await page.locator('[data-review-lab="choose"][data-review-task="compare"]').click();
+  await page.locator('.summary-lab[data-lab-id="choose"] .dashboard-foundation > summary').click();
+  await page.locator('.summary-lab[data-lab-id="choose"] [data-review-task="compare"]').click();
   await expect(page.locator('#chart-source')).toHaveValue('completion');
   await page.locator('#completed-review > summary').click();
   await expect(page.locator('#completed-review')).toContainText('สะท้อนคิดสถานการณ์ choose');
