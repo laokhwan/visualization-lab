@@ -9,9 +9,9 @@
 .pill { white-space: nowrap; }
 #stage-title small { display: block; color: var(--muted); font-size: 15px; font-weight: 400; margin-top: 5px; }
 .button-row [data-task][aria-pressed='true'] { border-color: var(--teal); background: #e8f4f1; box-shadow: inset 0 -2px var(--teal); }
-.eyebrow { font-size: 13px; font-weight: 700; color: var(--teal); margin-bottom: 8px; }
+.eyebrow { font-size: 13px; font-weight: 600; color: var(--teal); margin-bottom: 8px; }
 .button-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
-button { border: 1px solid transparent; padding: 10px 16px; border-radius: 10px; font-weight: 600; }
+button { border: 1px solid transparent; padding: 10px 16px; border-radius: 10px; font-weight: 500; }
 .primary { color: white; background: var(--teal); }
 .secondary { color: var(--navy); background: white; border-color: #aebccc; }
 .text-button { color: var(--teal); background: transparent; text-decoration: underline; padding: 8px 10px; }
@@ -25,7 +25,7 @@ button { border: 1px solid transparent; padding: 10px 16px; border-radius: 10px;
 .nav-item strong { font-size: 15px; }
 .nav-item small { font-size: 12px; color: var(--muted); }
 .nav-item[aria-current='step'], .nav-item[aria-current='true'] { background: #e8f4f1; border-color: var(--teal); box-shadow: inset 3px 0 var(--teal); }
-.nav-number { color: var(--teal); font-weight: 700; }
+.nav-number { color: var(--teal); font-weight: 600; }
 .aside-foot { border-top: 1px solid var(--line); margin-top: 14px; padding-top: 16px; font-size: 14px; }
 progress { width: 100%; height: 12px; accent-color: var(--teal); }
 .intro, .help { color: var(--muted); }
@@ -36,18 +36,18 @@ progress { width: 100%; height: 12px; accent-color: var(--teal); }
 .step-heading { display: flex; gap: 10px; align-items: center; }
 .step-number { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #e6f3f0; color: var(--teal); font-size: 15px; }
 .field { margin-bottom: 16px; }
-.field label { display: block; margin-bottom: 7px; font-weight: 600; font-size: 15px; }
+.field label { display: block; margin-bottom: 7px; font-weight: 500; font-size: 15px; }
 fieldset { border: 1px solid var(--line); padding: 12px; border-radius: 10px; margin: 0 0 8px; min-width: 0; }
 legend { padding: 0 5px; font-size: 15px; font-weight: 600; }
 .check { display: flex; align-items: center; gap: 12px; min-height: 44px; }
 .preview h3 { margin: 4px 0; }
 .chart-scroll .tick, .chart-scroll .axis-label { font-size: 16px; fill: var(--muted); }
-.chart-scroll .value-label { font-size: 17px; font-weight: 650; fill: var(--navy); paint-order: stroke; stroke: white; stroke-width: 3px; }
+.chart-scroll .value-label { font-size: 17px; font-weight: 600; fill: var(--navy); paint-order: stroke; stroke: white; stroke-width: 3px; }
 .gridline { stroke: #e1e7ef; }
 .axis { stroke: #8999ac; }
 .mark { cursor: pointer; }
 .mark:focus { outline: none; stroke: #17324d; stroke-width: 4px; }
-.pie-label { font-size: 17px; font-weight: 700; fill: #17324d; paint-order: stroke; stroke: white; stroke-width: 4px; }
+.pie-label { font-size: 17px; font-weight: 600; fill: #17324d; paint-order: stroke; stroke: white; stroke-width: 4px; }
 .legend { list-style: none; padding: 0; display: flex; gap: 8px 18px; flex-wrap: wrap; font-size: 14px; }
 .legend li { display: flex; align-items: center; gap: 7px; }
 .swatch { display: inline-block; width: 13px; height: 13px; border: 1px solid #526175; border-radius: 3px; flex-shrink: 0; }
@@ -59,9 +59,9 @@ legend { padding: 0 5px; font-size: 15px; font-weight: 600; }
 .feedback p { margin-bottom: 8px; }
 .criteria { list-style: none; padding: 0; }
 .criteria li { padding: 9px 0; border-bottom: 1px solid var(--line); }
-.criterion-icon { font-weight: 700; display: inline-block; width: 28px; }
+.criterion-icon { font-weight: 600; display: inline-block; width: 28px; }
 .criteria .help { margin: 4px 0 0 28px; }
-.success { color: #145d58; font-weight: 700; }
+.success { color: #145d58; font-weight: 600; }
 .stage-actions { display: flex; gap: 12px; justify-content: space-between; margin-top: 24px; flex-wrap: wrap; }
 details { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 8px; }
 summary { display: list-item; padding: 9px 4px; color: var(--navy); font-weight: 600; }

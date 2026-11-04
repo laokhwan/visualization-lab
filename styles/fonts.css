@@ -1,0 +1,22 @@
+/* IBM Plex Sans Thai, unmodified Google Fonts files; see assets/fonts/ibm-plex-sans-thai/OFL.txt. */
+@font-face {
+  font-family: 'IBM Plex Sans Thai';
+  src: url('../assets/fonts/ibm-plex-sans-thai/IBMPlexSansThai-Regular.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Thai';
+  src: url('../assets/fonts/ibm-plex-sans-thai/IBMPlexSansThai-Medium.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'IBM Plex Sans Thai';
+  src: url('../assets/fonts/ibm-plex-sans-thai/IBMPlexSansThai-SemiBold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}

@@ -9,7 +9,7 @@
   --white: #fff;
   --amber: #fff4d6;
   --focus: #a64700;
-  font-family: system-ui, -apple-system, 'Noto Sans Thai', Tahoma, sans-serif;
+  font-family: 'IBM Plex Sans Thai', system-ui, -apple-system, Tahoma, sans-serif;
   color: var(--ink);
   background: var(--bg);
   line-height: 1.65;
@@ -25,7 +25,8 @@ button:disabled { opacity: .55; cursor: default; }
 input, select, textarea { width: 100%; min-width: 0; border: 1px solid #9baabd; border-radius: 9px; padding: 10px 12px; background: white; color: var(--ink); font-size: 16px; }
 input[type='checkbox'] { width: 22px; min-height: 22px; height: 22px; accent-color: var(--teal); flex-shrink: 0; }
 textarea { min-height: 110px; resize: vertical; }
-h1, h2, h3, h4 { line-height: 1.4; color: var(--navy); }
+h1, h2, h3, h4 { line-height: 1.4; color: var(--navy); font-weight:600; }
+strong, b { font-weight:600; }
 h2 { font-size: clamp(23px, 2.5vw, 29px); margin: 6px 0 8px; }
 h3 { font-size: 18px; margin: 0 0 14px; }
 p { margin: 0 0 14px; }
