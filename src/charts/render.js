@@ -4,14 +4,21 @@ import { yDomain, linearScale, formatNumber, formatPercent } from './scales.js';
 import { barMark, dotMark, lineMark, pieMarks, colorFor } from './marks.js';
 import { isResearch } from '../data/view.js';
 import { researchSvg, researchLegend } from './research.js';
-
-export function chartSvg(data, config, prefix = 'live-svg') {
+export function chartSvg(data, config, prefix = 'live-svg', layout = {}) {
   const errors = validateChart(data, config);
   if (errors.length) return `<div class="chart-error" role="status"><strong>ยังไม่สามารถแสดงกราฟ</strong><ul>${errors.map(error => `<li>${esc(error)}</li>`).join('')}</ul></div>`;
-  if (isResearch(data)) return researchSvg(data, config, prefix);
-  let svg = `<svg viewBox="0 0 640 360" role="group" aria-labelledby="${prefix}-title ${prefix}-desc"><title id="${prefix}-title">${esc(data.title)}</title><desc id="${prefix}-desc">ข้อมูลจำลอง หน่วย ${esc(data.unit)} แตะหรือเลือกจุดข้อมูลเพื่ออ่านค่า มีตารางข้อมูลประกอบด้านล่าง</desc>`;
-  if (config.kind === 'pie') return svg + pieMarks(data, config) + `<text x="320" y="337" text-anchor="middle" class="axis-label">สัดส่วนของผลรวม · ${esc(data.unit)}</text></svg>`;
-  const left = 76, right = 610, top = 42, bottom = 278;
+  if (isResearch(data)) return researchSvg(data, config, prefix, layout);
+  const W = layout.width ?? 640,
+    H = layout.height ?? (layout.compact ? Math.max(280, Math.min(360, Math.round(W * .48))) : 360);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" role="group" aria-labelledby="${prefix}-title ${prefix}-desc"><title id="${prefix}-title">${esc(data.title)}</title><desc id="${prefix}-desc">ข้อมูลจำลอง หน่วย ${esc(data.unit)} แตะหรือเลือกจุดข้อมูลเพื่ออ่านค่า มีตารางข้อมูลประกอบด้านล่าง</desc>`;
+  if (config.kind === 'pie') return svg + pieMarks(data, config, {
+    width: W,
+    height: H
+  }) + `<text x="${W / 2}" y="${H - 23}" text-anchor="middle" class="axis-label">สัดส่วนของผลรวม · ${esc(data.unit)}</text></svg>`;
+  const left = layout.compact ? 64 : 76,
+    right = W - 30,
+    top = 42,
+    bottom = H - 82;
   const domain = yDomain(data, config);
   const y = linearScale(domain.min, domain.max, bottom, top);
   for (let i = 0; i <= 4; i++) {
@@ -33,17 +40,22 @@ export function chartSvg(data, config, prefix = 'live-svg') {
     svg += config.kind === 'bar' ? barMark(row, i, config, x, y, width, base) : dotMark(row, i, config, x, y);
     const label = numericX && data.xType === 'number' ? formatNumber(row.x) : row.label;
     if (!numericX || !ticksSeen.has(row.x)) {
-      const short = label.length > 12 ? label.slice(0, 11) + '…' : label;
-      svg += `<text x="${x}" y="303" text-anchor="middle" class="tick"><title>${esc(label)}</title>${esc(short)}</text>`;
+      const short = label.length > (layout.compact && W < 500 ? 8 : 12) ? label.slice(0, layout.compact && W < 500 ? 7 : 11) + '…' : label;
+      svg += `<text x="${x}" y="${H - 57}" text-anchor="middle" class="tick"><title>${esc(label)}</title>${esc(short)}</text>`;
       ticksSeen.add(row.x);
     }
-    if (config.labels) svg += `<text x="${x}" y="${row.value < 0 ? Math.min(295, y(row.value) + 20) : Math.max(34, y(row.value) - 12)}" text-anchor="middle" class="value-label">${formatNumber(row.value)}</text>`;
+    if (config.labels) svg += `<text x="${x}" y="${row.value < 0 ? Math.min(H - 65, y(row.value) + 20) : Math.max(34, y(row.value) - 12)}" text-anchor="middle" class="value-label">${formatNumber(row.value)}</text>`;
   });
-  return svg + `<text x="343" y="341" text-anchor="middle" class="axis-label">${esc(data.xLabel)}</text></svg>`;
+  return svg + `<text x="${(left + right) / 2}" y="${H - 19}" text-anchor="middle" class="axis-label">${esc(data.xLabel)}</text></svg>`;
 }
-
 export function legendHtml(data, config) {
-  if (isResearch(data)) { try { return researchLegend(data,config); } catch { return ''; } }
+  if (isResearch(data)) {
+    try {
+      return researchLegend(data, config);
+    } catch {
+      return '';
+    }
+  }
   const total = data.rows.reduce((sum, row) => sum + row.value, 0);
   return data.rows.map((row, i) => `<li><span class="swatch" style="background:${colorFor(config, i)}" aria-hidden="true"></span>${esc(row.label)}${config.labels && config.kind === 'pie' && total > 0 ? ` · ${formatNumber(row.value)} (${formatPercent(row.value / total * 100)}%)` : ''}</li>`).join('');
 }

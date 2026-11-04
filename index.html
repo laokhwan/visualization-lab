@@ -11,18 +11,18 @@
 </head>
 <body>
   <a href="#workspace" class="skip-link">ข้ามไปยังกิจกรรม</a>
-  <header class="top"><a class="brand" href="#"><span class="logo" aria-hidden="true">▥</span><span><strong>Visualization Lab</strong><small>พื้นฐานการวิจัย · มัธยมศึกษาปีที่ 4</small></span></a><span class="tag">เรียนรู้ได้โดยไม่ลงชื่อเข้าใช้</span></header>
+  <header class="top"><a class="brand" href="#home" id="go-home" aria-label="Visualization Lab กลับหน้าแรก"><span class="logo" aria-hidden="true">▥</span><span><strong>Visualization Lab</strong><small>พื้นฐานการวิจัย · มัธยมศึกษาปีที่ 4</small></span></a><div id="app-actions" hidden><div class="mode-buttons" role="group" aria-label="รูปแบบการเรียนรู้"><button data-mode="guided" aria-pressed="true">กิจกรรม</button><button data-mode="free" aria-pressed="false">ทดลองอิสระ</button></div><button id="storage-toggle" class="secondary" aria-expanded="false" aria-controls="storage-panel"><span id="save-indicator">อยู่ในหน้านี้</span></button><button id="show-summary" class="secondary" aria-label="สรุปการเรียนรู้">สรุป</button><button id="home-button" class="text-button">หน้าแรก</button></div></header>
   <main class="shell">
-    <section class="hero" aria-labelledby="page-title">
-      <div><p class="eyebrow">ห้องปฏิบัติการข้อมูล</p><h1 id="page-title">การแสดงข้อมูล<br><em>เพื่อการวิจัย</em></h1><p>ฝึกเลือกและปรับกราฟให้เหมาะสมกับข้อมูลและวัตถุประสงค์</p><div class="button-row"><button id="start-guided" class="primary">เริ่มกิจกรรมตามขั้นตอน</button><button id="start-free" class="secondary">เปิดการทดลองอิสระ</button></div></div>
-      <div class="hero-art" aria-hidden="true"><div class="sample-chart"><span style="height:42%"></span><span style="height:65%"></span><span style="height:87%"></span><span style="height:58%"></span></div><p>เลือกให้เหมาะสม · สื่อสารอย่างถูกต้อง</p></div>
+    <section id="landing" class="hero" aria-labelledby="page-title">
+      <div><p class="eyebrow">ห้องปฏิบัติการข้อมูล</p><h1 id="page-title">การแสดงข้อมูล<br><em>เพื่อการวิจัย</em></h1><p>ฝึกเลือกและปรับกราฟให้เหมาะสมกับข้อมูลและวัตถุประสงค์</p><div class="button-row"><button id="start-guided" disabled class="primary">เริ่มกิจกรรมตามขั้นตอน</button><button id="start-free" disabled class="secondary">เปิดการทดลองอิสระ</button><button id="resume-learning" disabled class="secondary" hidden>เรียนต่อ</button></div><p id="resume-note" hidden></p></div>
+      <p id="initial-status" role="status">กำลังเตรียมพื้นที่เรียนรู้</p><div class="hero-art" aria-hidden="true"><div class="sample-chart"><span style="height:42%"></span><span style="height:65%"></span><span style="height:87%"></span><span style="height:58%"></span></div><p>เลือกให้เหมาะสม · สื่อสารอย่างถูกต้อง</p></div>
     </section>
-    <section id="workspace" class="workspace" tabindex="-1" aria-label="พื้นที่เรียนรู้" aria-busy="true">
-      <div class="switcher" role="group" aria-label="รูปแบบการเรียนรู้"><button data-mode="guided" aria-pressed="true">กิจกรรมตามขั้นตอน <small>(Guided Challenge)</small></button><button data-mode="free" aria-pressed="false">ทดลองอิสระ <small>(Free Exploration)</small></button></div>
-      <section id="storage-panel" class="storage-panel" aria-label="การบันทึกความคืบหน้า"></section>
-      <div class="workgrid"><aside class="sidebar" aria-label="เลือกกิจกรรม"><div id="navigation"></div><div id="guided-progress" class="aside-foot"><p id="progress-text"></p><progress id="progress" value="0" max="10" aria-label="จำนวนข้อที่เคยตอบถูก"></progress><p id="completion-text"></p><button id="show-summary" class="secondary">สรุปการเรียนรู้</button><button id="reset-guided" class="text-button">เริ่มการฝึกใหม่ทั้งหมด</button><p class="help">เมื่อเปิดบันทึกและบันทึกสำเร็จ ความคืบหน้าจะกลับมาได้บนเครื่องนี้</p></div></aside>
-        <section id="stage" class="stage" aria-labelledby="stage-title"></section>
-      </div>
+    <section id="landing-labs" class="landing-labs" aria-labelledby="labs-title"><h2 id="labs-title">กิจกรรมการเรียนรู้</h2><div id="landing-lab-list"></div></section>
+    <section id="workspace" class="workspace" hidden tabindex="-1" aria-label="พื้นที่เรียนรู้" aria-busy="true">
+      <section id="storage-panel" class="storage-panel" hidden aria-label="การบันทึกความคืบหน้า"></section>
+      <div id="context-bar"></div>
+      <details id="guided-progress" class="progress-disclosure"><summary><span id="progress-text"></span><progress id="progress" value="0" max="34" aria-label="จำนวนข้อที่เคยตอบถูก"></progress></summary><p id="completion-text"></p><button id="reset-guided" class="text-button">เริ่มการฝึกใหม่ทั้งหมด</button><p class="help">Mastery ไม่ลดจากความผิดพลาดระหว่างฝึก ผลจากเบราว์เซอร์แก้ไขได้ ไม่ใช่ผลการเรียนที่ผ่านการยืนยัน</p></details>
+      <section id="stage" class="stage" aria-labelledby="stage-title"></section>
     </section>
     <footer><p>ข้อมูลทั้งหมดเป็นข้อมูลจำลองเพื่อการศึกษา · ไม่มีบัญชีผู้ใช้หรือระบบส่งคำตอบ</p><details><summary>ความเป็นส่วนตัว</summary><p>แอปไม่มี analytics หรือระบบส่งข้อมูล เมื่อเลือกเปิดบันทึก ความคืบหน้าและสะท้อนคิดจะอยู่ใน IndexedDB บนเครื่องนี้ และ localStorage เก็บเพียงตัวเลือกเปิดบันทึก เครื่องที่ใช้ร่วมกันอาจเห็นข้อมูลเดิมได้ เบราว์เซอร์อาจลบข้อมูลหรือปฏิเสธการบันทึก ผลแก้ไขได้และไม่ใช่ผลการเรียนที่ยืนยันแล้ว ไฟล์ PDF ที่ดาวน์โหลดไม่ถูกลบเมื่อล้างข้อมูลในแอป ผู้ให้บริการ GitHub Pages อาจบันทึก IP ตามนโยบายของบริการ</p></details></footer>
   </main>

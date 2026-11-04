@@ -1,56 +1,7 @@
-import { labs, predictions } from '../content/labs.js';
-import { datasets } from '../content/datasets.js';
-import { th } from '../content/locales/th.js';
-import { current } from '../state.js';
-import { controlsHtml, editorHtml } from './controls.js';
-import { escapeHtml as esc, options } from './html.js';
-import { chartSvg, legendHtml } from '../charts/render.js';
+import { escapeHtml as esc } from './html.js';
 import { formatNumber } from '../charts/scales.js';
-import { taskMastered } from '../learning/practice.js';
-import { experimentsHtml, reasoningHtml } from './practice.js';
 import { isResearch } from '../data/view.js';
 import { researchTable } from './research.js';
-
-export function navigationHtml(state) {
-  if (state.mode === 'free') return '<h2>ชุดข้อมูล (Dataset)</h2>' + Object.values(datasets).map(data => `<button class="nav-item" data-dataset="${data.id}"${state.free.dataset.id === data.id ? ' aria-current="true"' : ''}><span><strong>${esc(data.title)}</strong><small>${data.rows.length} รายการ · ${esc(data.unit)}</small></span></button>`).join('');
-  return '<h2>กิจกรรมการเรียนรู้</h2>' + labs.map((lab, i) => {
-    const complete = lab.tasks.every(task => state.guided[lab.id][task.id].completion);
-    const mastered = lab.tasks.every(task => taskMastered(task, state.guided[lab.id][task.id]));
-    const status = complete ? '✓ ทำกิจกรรมครบแล้ว' : mastered ? 'ผ่านข้อประเมินครบ · ยังทำกิจกรรมไม่ครบ' : 'ยังผ่านข้อประเมินไม่ครบ';
-    return `<button class="nav-item" data-lab="${lab.id}"${state.labId === lab.id && state.view !== 'summary' ? ' aria-current="step"' : ''}><span class="nav-number">${String(i + 1).padStart(2, '0')}</span><span><strong>${lab.title}</strong><small>${lab.english}</small><small>${status}</small></span></button>`;
-  }).join('');
-}
-
-function previewHtml() {
-  return `<section class="preview" aria-labelledby="chart-title"><div class="preview-header"><div><p class="eyebrow">กราฟที่ปรับได้</p><h3 id="chart-title"></h3></div><button id="reset-chart" class="secondary">คืนค่ากราฟ</button></div>
-    <div id="chart" class="chart-scroll" tabindex="0" aria-label="พื้นที่กราฟ เลื่อนแนวนอนได้"></div><ul id="legend" class="legend" aria-label="คำอธิบายข้อมูล"></ul>
-    <p class="help">แตะจุดข้อมูลเพื่ออ่านค่า หากกราฟกว้างเกินพื้นที่ ให้เลื่อนในกราฟ</p><p id="inspection" class="inspection" role="status">เลือกแท่ง จุด หรือส่วนของกราฟเพื่ออ่านค่า</p>
-    <div id="chart-notice" role="status"></div><p id="axis-range" class="help"></p><details><summary>ดูตารางข้อมูล</summary><div id="data-table" class="table-scroll"></div></details></section>`;
-}
-
-export function stageHtml(state) {
-  const free = state.mode === 'free';
-  const { lab, task, draft } = current(state);
-  const data = free ? state.free.dataset : datasets[task.dataset];
-  const config = free ? state.free.config : draft.config;
-  const header = `<div class="stage-header"><div><p class="eyebrow">${free ? th.free : `กิจกรรม ${labs.indexOf(lab) + 1} / ${labs.length}`}</p><h2 id="stage-title" tabindex="-1">${free ? 'ทดลองการนำเสนอข้อมูล' : `${lab.title} <small>(${lab.english})</small>`}</h2><p class="intro">${free ? 'ปรับชนิดกราฟ สี แกน และข้อมูล เพื่อสังเกตผลที่เปลี่ยนไป' : lab.intro}</p></div>${free ? '' : `<span class="pill">สถานการณ์ ${state.taskIndex + 1} / ${lab.tasks.length}</span>`}</div>`;
-  const taskNav = !free && lab.tasks.length > 1 ? `<div class="button-row" role="group" aria-label="สถานการณ์">${lab.tasks.map((item, i) => `<button class="secondary" data-task="${i}" aria-pressed="${i === state.taskIndex}">สถานการณ์ ${i + 1}${item.title ? ` · ${esc(item.title)}` : ''} <small>${item.section === 'extension' ? 'เพิ่มเติม' : 'พื้นฐาน'}</small></button>`).join('')}</div>` : '';
-  let prediction = '';
-  if (!free) {
-    const field = task.prediction === 'text' ? `<textarea id="prediction" maxlength="1000"${draft.predictionSaved ? ' disabled' : ''}>${esc(draft.prediction)}</textarea>`
-      : `<select id="prediction"${draft.predictionSaved ? ' disabled' : ''}>${options(predictions[task.prediction] || th.prediction, draft.prediction)}</select>`;
-    prediction = `<section class="step"><h3 class="step-heading"><span class="step-number">1</span>คาดการณ์</h3><div class="field"><label for="prediction">${task.predict}</label>${field}</div><button id="save-prediction" class="secondary"${draft.predictionSaved ? ' disabled' : ''}>${draft.predictionSaved ? 'บันทึกคำคาดการณ์แล้ว' : 'บันทึกคำคาดการณ์'}</button><p class="help">คำคาดการณ์ไม่ถูกให้คะแนน และไม่ลด Mastery เมื่อตอบต่างจากผลการทดลอง</p><p id="prediction-message" role="status"></p></section>`;
-  }
-  const original = !free && lab.compare ? `<details class="original" open><summary>กราฟต้นฉบับสำหรับเปรียบเทียบ</summary><div id="original-chart" class="chart-scroll" tabindex="0" aria-label="กราฟต้นฉบับ เลื่อนแนวนอนได้">${chartSvg(data, task.config, 'original')}</div><ul class="legend">${legendHtml(data, task.config)}</ul><p class="help">${isResearch(data) ? 'ต้นฉบับใช้ข้อมูลจำลองเดียวกับกราฟที่ปรับได้; ดูหน่วยและบริบทประกอบ' : `ต้นฉบับเริ่มแกนที่ ${task.config.baseline} · ข้อมูลเดียวกับกราฟที่ปรับได้`}</p><p id="original-inspection" class="inspection" role="status">เลือกข้อมูลในกราฟต้นฉบับเพื่ออ่านค่า</p></details>` : '';
-  const controls = controlsHtml(data, config, free ? ['kind', 'palette', 'highlight', 'baseline'] : lab.controls, free);
-  const experiment = free ? '' : `<div class="experiment-panel"><h4>บันทึกกราฟเพื่อเปรียบเทียบ</h4><p class="help">ปรับกราฟตามรายการ แล้วบันทึกแต่ละรูปแบบ ค่าที่บันทึกไว้เปิดดูย้อนหลังได้</p><div id="experiments-list">${experimentsHtml(task, draft)}</div><button id="record-experiment" class="secondary"${draft.predictionSaved ? '' : ' disabled'}>บันทึกแบบเปรียบเทียบ</button><p id="experiment-message" role="status"></p></div>`;
-  const labIndex = labs.indexOf(lab);
-  return header + taskNav + (free ? '' : `<div class="mission"><strong>โจทย์</strong><p>${task.mission}</p>${task.explanation ? `<p class="help">${esc(task.explanation)}</p>` : ''}</div>`) + prediction + original +
-    `<section class="step">${free ? '' : '<h3 class="step-heading"><span class="step-number">2</span>ทดลองปรับกราฟ</h3>'}<div class="editor"><div id="controls" class="controls">${free ? controls : `<fieldset id="experiment-controls" class="controls-fieldset"${draft.predictionSaved ? '' : ' disabled'}><legend class="sr-only">ตัวควบคุมกราฟ</legend>${controls}</fieldset>`}</div>${previewHtml()}</div>${experiment}</section>` +
-    (free ? editorHtml(data) : reasoningHtml(task, draft)) + '<p id="practice-announcement" class="sr-only" role="status" aria-live="polite"></p>' +
-    (free ? '<div class="stage-actions"><button class="secondary" id="return-guided">กลับสู่กิจกรรมตามขั้นตอน</button></div>' : `<div class="stage-actions"><button id="previous" class="secondary"${labIndex === 0 && state.taskIndex === 0 ? ' disabled' : ''}>← กิจกรรมก่อนหน้า</button><button id="next" class="secondary">${labIndex === labs.length - 1 && state.taskIndex === lab.tasks.length - 1 ? 'ดูสรุปการเรียนรู้ →' : 'กิจกรรมถัดไป →'}</button></div>`);
-}
-
 export function tableHtml(data, config) {
   if (isResearch(data)) return researchTable(data, config);
   return `<table><caption>${esc(data.title)} · ข้อมูลจำลอง</caption><thead><tr><th scope="col">${esc(data.xType === 'category' ? data.xLabel : 'รายการ')}</th>${data.xType !== 'category' ? `<th scope="col">${esc(data.xLabel)}</th>` : ''}<th scope="col">${esc(data.unit)}</th></tr></thead><tbody>${data.rows.map(row => `<tr><th scope="row">${esc(row.label)}</th>${data.xType !== 'category' ? `<td>${formatNumber(row.x)}</td>` : ''}<td>${formatNumber(row.value)}</td></tr>`).join('')}</tbody></table>`;
